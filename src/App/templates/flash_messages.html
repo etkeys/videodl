@@ -1,0 +1,25 @@
+{% set class_alert_error = "w3-panel w3-leftbar w3-border-red w3-pale-red" %}
+{% set class_alert_info = "w3-panel w3-leftbar w3-border-blue w3-pale-blue" %}
+{% set class_alert_success = "w3-panel w3-leftbar w3-border-green w3-pale-green" %}
+{% set class_alert_warn = "w3-panel w3-leftbar w3-border-yellow w3-pale-yellow" %}
+
+<div class="w3-row">
+    <div class="w3-col w3-quarter">&nbsp;</div>
+    <div class="w3-col s12 m6 l6">
+    {% if messages %}
+        {% for category, message in messages %}
+            {% if category == 'error' %}
+            <div class="{{ class_alert_error }}">
+            {% elif category == 'success' %}
+            <div class="{{ class_alert_success }}">
+            {% elif category == 'warning' %}
+            <div class="{{ class_alert_warn }}">
+            {% else %}
+            <div class="{{ class_alert_info }}">
+            {% endif %}
+                <p>{{ message }}</p>
+            </div>
+        {% endfor %}
+    {% endif %}
+    </div>
+</div>

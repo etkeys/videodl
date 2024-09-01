@@ -1,0 +1,40 @@
+html, body {
+    height: 100%;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.content {
+    flex: 1 0 auto;
+    margin-bottom: 50px;
+}
+
+footer {
+    flex-shrink: 0;
+    margin-top: auto;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 100%;
+}
+
+.non-mobile-flash-message {
+    margin-left: 30%;
+    width: 40%;
+}
+
+.item-details-url {
+    font-family: monospace;
+}
+
+table.item-details tr td {
+    padding: 0px;
+}
+
+table.item-details tr td.item-details-label {
+    font-weight: bold;
+    text-align: right;
+    padding-right: 8px;
+}

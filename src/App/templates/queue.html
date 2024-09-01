@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block content %}
+    <h2>A list of items to be downloaded</h2>
+    <p>This is a description of what the queue is for.</p>
+    <div class="w3-row">
+        <table class="w3-twothird w3-table w3-bordered">
+            <tr>
+                <th>Item</th>
+                <th>Details</th>
+                <th>Actions</th>
+            </tr>
+            {% for item in queue %}
+                <tr>
+                    <td style="vertical-align: middle;">{{ loop.index }}</td>
+                    <td>
+                        <table class="item-details">
+                            <tr>
+                                <td class="item-details-label">Title</td>
+                                <td>{{ item['Title'] }}</td>
+                            </tr>
+                            <tr>
+                                <td class="item-details-label">Audio Only</td>
+                                <td>{{ item['AudioOnly'] }}</td>
+                            </tr>
+                            <tr>
+                                <td class="item-details-label">URL</td>
+                                <td class="item-details-url"><a target="_blank" href="{{ item['Url'] }}" >{{ item['Url'] }}</a></td>
+                            </tr>
+                        </table>
+                    </td>
+                    <td style="vertical-align: middle;">&lt;Edit&gt;<br/>&lt;Delete&gt;</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+{% endblock content %}
