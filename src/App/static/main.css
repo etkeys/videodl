@@ -29,6 +29,11 @@ footer {
     font-family: monospace;
 }
 
+button a {
+    cursor: inherit;
+    text-decoration: none;
+}
+
 table.item-details tr td {
     padding: 0px;
 }

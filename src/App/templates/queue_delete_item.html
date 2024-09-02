@@ -1,0 +1,29 @@
+
+{% extends "base.html" %}
+{% block content %}
+    <h2>Confirm delete queue item</h2>
+    <p>Are you sure you want to remove the following item from the queue?</p>
+    <form method="POST" action="" class="w3-container">
+        {{ form.hidden_tag() }}
+        <table class="item-details">
+            <tr>
+                <td class="item-details-label">Title</td>
+                <td>{{ form.title }}</td>
+            </tr>
+            <tr>
+                <td class="item-details-label">Audio Only</td>
+                <td>{{ form.audio_only }}</td>
+            </tr>
+            <tr>
+                <td class="item-details-label">URL</td>
+                <td class="item-details-url">
+                    <a target="_blank" href="{{ form.url }}" >{{ form.url }}</a>
+                </td>
+            </tr>
+        </table>
+        <div class="w3-section">
+            {{ form.submit_del(class="w3-btn w3-grey w3-round w3-margin") }}
+            {{ form.submit_can(class="w3-btn w3-grey w3-round w3-margin") }}
+        </div>
+    </form>
+{% endblock content %}

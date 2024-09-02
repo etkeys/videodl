@@ -28,7 +28,12 @@
                             </tr>
                         </table>
                     </td>
-                    <td style="vertical-align: middle;">&lt;Edit&gt;<br/>&lt;Delete&gt;</td>
+                    <td style="vertical-align: middle;">
+                        <ul style="list-style-type: none;">
+                            <li>&lt;Edit&gt;</li>
+                            <li><button type="button" class="w3-btn w3-grey w3-round"><a href="{{ url_for('queue.confirm_delete_queue_item', id=item['Id']) }}">Delete</a></button></li>
+                        </ul>
+                    </td>
                 </tr>
             {% endfor %}
         </table>
