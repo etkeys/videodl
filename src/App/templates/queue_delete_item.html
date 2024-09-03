@@ -22,8 +22,10 @@
             </tr>
         </table>
         <div class="w3-section">
-            {{ form.submit_del(class="w3-btn w3-grey w3-round w3-margin") }}
-            {{ form.submit_can(class="w3-btn w3-grey w3-round w3-margin") }}
+            {{ form.submit(class="w3-btn w3-grey w3-round w3-margin") }}
+            <button id="Cancel" type="button" class="w3-btn w3-grey w3-round w3-margin">
+                <a href="{{ url_for('queue.display_queue') }}">No, go back.</a>
+            </button>
         </div>
     </form>
 {% endblock content %}

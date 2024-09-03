@@ -1,0 +1,64 @@
+
+{% extends "base.html" %}
+{% set class_invalid_input="w3-input w3-topbar w3-bottombar w3-leftbar w3-rightbar w3-border-red" %}
+{% set class_invalid_message="w3-margin-left w3-text-red" %}
+{% set class_input="w3-input w3-left" %}
+{% block content %}
+    <h2>Add Item</h2>
+    <div class="w3-row">
+        <div class="w3-twothird">
+            <p>Fill out the information below to add an item to the download queue</p>
+            <form method="POST" action="" class="w3-container">
+                {{ form.hidden_tag() }}
+                <fieldset>
+                    <table class="item-details">
+                        <tr style="visibility: collapse;">
+                            <td style="width: 7em;">&nbsp;</td>
+                            <td style="width: 100%;">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="item-details-label">{{ form.title.label }}<sup>1</sup></td>
+                            <td>
+                                {% if form.title.errors %}
+                                    {{ form.title(class=class_invalid_input) }}
+                                    <div class="{{ class_invalid_message }}">
+                                        {% for error in form.title.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.title(class=class_input) }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="item-details-label">{{ form.audio_only.label }}</td>
+                            <td>{{ form.audio_only(class=class_input) }}</td>
+                        </tr>
+                        <tr>
+                            <td class="item-details-label">{{ form.url.label }}</td>
+                            <td>
+                                {% if form.url.errors %}
+                                    {{ form.url(class=class_invalid_input) }}
+                                    <div class="{{ class_invalid_message }}">
+                                        {% for error in form.url.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.url(class=class_input) }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </fieldset>
+                <div class="w3-section">
+                    {{ form.submit(class="w3-btn w3-grey w3-round w3-margin") }}
+                    <button id="Cancel" type="button" class="w3-btn w3-grey w3-round w3-margin">
+                        <a href="{{ url_for('queue.display_queue') }}">Cancel</a>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

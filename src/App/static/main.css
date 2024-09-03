@@ -36,10 +36,16 @@ button a {
 
 table.item-details tr td {
     padding: 0px;
+    text-align: left;
 }
 
 table.item-details tr td.item-details-label {
     font-weight: bold;
     text-align: right;
     padding-right: 8px;
+    min-width: 7em;
+}
+
+table.item-details tr td input#audio_only {
+    max-width: 3em;
 }
