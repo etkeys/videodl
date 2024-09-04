@@ -85,6 +85,21 @@ def edit_item_submit(id: int):
             title="Edit Item"
         )
 
+@todo_blueprint.get('/delete')
+def confirm_delete_todo_all():
+    if len(user_todo) < 1:
+        return redirect(url_for('todo.display_todo'))
+
+    return render_template("todo_delete_all.html", num_items=len(user_todo))
+
+@todo_blueprint.post('/delete')
+def delete_all():
+    if len(user_todo) > 0:
+        user_todo.clear()
+
+    return redirect(url_for('todo.display_todo'))
+
+
 @todo_blueprint.get('/<id>/delete')
 def confirm_delete_todo_item(id: int):
     try:

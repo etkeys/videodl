@@ -1,0 +1,10 @@
+{% set title="To Do - Delete All Items" %}
+{% extends "base.html" %}
+{% block content %}
+    <h2>Confirm delete all items from To-Do list</h2>
+    <p>Are you sure you want remove all {{ num_items }} from the to-do list?</p>
+    <form method="POST" action="{{ url_for('todo.delete_all') }}" class="w3-container">
+        <input type="submit" class="input-button w3-btn w3-grey w3-round w3-magin" value="Yes, I'm sure."/>
+        <button type="button" class="w3-btn w3-grey w3-round w3-margin" onclick="location.href='{{ url_for('todo.display_todo') }}'">No, go back.</button>
+    </form>
+{% endblock content %}
