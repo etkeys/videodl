@@ -34,6 +34,14 @@ button a {
     text-decoration: none;
 }
 
+button {
+    min-width: 100px;
+}
+
+input.input-button {
+    min-width: 100px;
+}
+
 table.item-details tr td {
     padding: 0px;
     text-align: left;
@@ -59,9 +67,4 @@ ul.action-buttons li {
     margin-top: 4px;
     margin-bottom: 4px;
 }
-
-ul.action-buttons li button {
-    min-width: 100px;
-}
-
 

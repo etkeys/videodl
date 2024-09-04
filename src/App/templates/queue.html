@@ -33,8 +33,8 @@
                     </td>
                     <td style="vertical-align: middle;">
                         <ul class="action-buttons">
-                            <li><button type="button" class="w3-btn w3-grey w3-round"><a href="{{ url_for('queue.edit_item', id=item['Id']) }}">Edit</a></button></li>
-                            <li><button type="button" class="w3-btn w3-grey w3-round"><a href="{{ url_for('queue.confirm_delete_queue_item', id=item['Id']) }}">Delete</a></button></li>
+                            <li><button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('queue.edit_item', id=item['Id']) }}'">Edit</button></li>
+                            <li><button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('queue.confirm_delete_queue_item', id=item['Id']) }}'">Delete</button></li>
                         </ul>
                     </td>
                 </tr>
