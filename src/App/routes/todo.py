@@ -86,7 +86,7 @@ def edit_item_submit(id: int):
         )
 
 @todo_blueprint.get('/delete')
-def confirm_delete_todo_all():
+def confirm_delete_all():
     if len(user_todo) < 1:
         return redirect(url_for('todo.display_todo'))
 
@@ -101,7 +101,7 @@ def delete_all():
 
 
 @todo_blueprint.get('/<id>/delete')
-def confirm_delete_todo_item(id: int):
+def confirm_delete_item(id: int):
     try:
         item = next(i for i in user_todo if i['Id'] == int(id))
 
@@ -118,7 +118,7 @@ def confirm_delete_todo_item(id: int):
         abort(404, description=f"Could not find item with Id of '{id}'.")
 
 @todo_blueprint.post('/<id>/delete')
-def delete_todo_item(id: int):
+def delete_item(id: int):
     form = DownloadItemDetailsForm(True)
     if form.submit.data:
         try:
