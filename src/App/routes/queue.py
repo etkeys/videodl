@@ -37,11 +37,53 @@ def add_item():
         flash(f"Item '{new_item['Title']}' added successfully.", category="success")
         return redirect(url_for('queue.display_queue'))
     else:
-        return render_template('queue_add_item.html', form=form)
+        return render_template('queue_add_edit_item.html', form=form, title="Add Item")
 
 @queue_blueprint.get('/')
 def display_queue():
     return render_template('queue.html', queue=user_queue)
+
+@queue_blueprint.get('/<id>/edit')
+def edit_item(id: int):
+    try:
+        item = next(i for i in user_queue if i['Id'] == int(id))
+
+        form = DownloadItemDetailsForm()
+        form.title.data = item['Title']
+        form.audio_only.data = item['AudioOnly']
+        form.url.data = item['Url']
+
+        return render_template(
+            'queue_add_edit_item.html',
+            form=form,
+            title="Edit Item"
+        )
+    except StopIteration:
+        abort(404, description=f"Could not find item with Id of '{id}'.")
+
+@queue_blueprint.post('/<id>/edit')
+def edit_item_submit(id: int):
+    form = DownloadItemDetailsForm()
+    if form.validate_on_submit():
+        try:
+            item = next(i for i in user_queue if i['Id'] == int(id))
+
+            item['Title'] = form.title.data
+            item['AudioOnly'] = form.audio_only.data
+            item['Url'] = form.url.data
+
+            flash('Item updated successfully.', category="success")
+            return redirect(url_for('queue.display_queue'))
+
+        except StopIteration:
+            abort(404, description=f"Could not find item with Id of '{id}'.")
+
+    else:
+        return render_template(
+            'queue_add_edit_item.html',
+            form=form,
+            title="Edit Item"
+        )
 
 @queue_blueprint.get('/<id>/delete')
 def confirm_delete_queue_item(id: int):

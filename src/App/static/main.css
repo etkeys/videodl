@@ -37,6 +37,7 @@ button a {
 table.item-details tr td {
     padding: 0px;
     text-align: left;
+    vertical-align: middle;
 }
 
 table.item-details tr td.item-details-label {
@@ -49,3 +50,18 @@ table.item-details tr td.item-details-label {
 table.item-details tr td input#audio_only {
     max-width: 3em;
 }
+
+ul.action-buttons {
+    list-style-type: none;
+}
+
+ul.action-buttons li {
+    margin-top: 4px;
+    margin-bottom: 4px;
+}
+
+ul.action-buttons li button {
+    min-width: 100px;
+}
+
+

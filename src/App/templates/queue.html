@@ -15,7 +15,7 @@
             {% for item in queue %}
                 <tr>
                     <td style="vertical-align: middle;">{{ loop.index }}</td>
-                    <td>
+                    <td style="vertical-align: middle;">
                         <table class="item-details">
                             <tr>
                                 <td class="item-details-label">Title</td>
@@ -32,8 +32,8 @@
                         </table>
                     </td>
                     <td style="vertical-align: middle;">
-                        <ul style="list-style-type: none;">
-                            <li>&lt;Edit&gt;</li>
+                        <ul class="action-buttons">
+                            <li><button type="button" class="w3-btn w3-grey w3-round"><a href="{{ url_for('queue.edit_item', id=item['Id']) }}">Edit</a></button></li>
                             <li><button type="button" class="w3-btn w3-grey w3-round"><a href="{{ url_for('queue.confirm_delete_queue_item', id=item['Id']) }}">Delete</a></button></li>
                         </ul>
                     </td>

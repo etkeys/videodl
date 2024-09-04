@@ -4,10 +4,14 @@
 {% set class_invalid_message="w3-margin-left w3-text-red" %}
 {% set class_input="w3-input w3-left" %}
 {% block content %}
-    <h2>Add Item</h2>
+    <h2>{{ title }}</h2>
     <div class="w3-row">
         <div class="w3-twothird">
-            <p>Fill out the information below to add an item to the download queue</p>
+            {% if title == 'Add Item' %}
+                <p>Fill out the information below to add an item to the download queue.</p>
+            {% else %}
+                <p>Update the information below for this item.</p>
+            {% endif %}
             <form method="POST" action="" class="w3-container">
                 {{ form.hidden_tag() }}
                 <fieldset>
