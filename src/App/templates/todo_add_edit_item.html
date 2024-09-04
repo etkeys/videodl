@@ -1,4 +1,5 @@
 
+{% set title = "To Do - " ~ title %}
 {% extends "base.html" %}
 {% set class_invalid_input="w3-input w3-topbar w3-bottombar w3-leftbar w3-rightbar w3-border-red" %}
 {% set class_invalid_message="w3-margin-left w3-text-red" %}
@@ -8,7 +9,7 @@
     <div class="w3-row">
         <div class="w3-twothird">
             {% if title == 'Add Item' %}
-                <p>Fill out the information below to add an item to the download queue.</p>
+                <p>Fill out the information below to add an item to the download todo.</p>
             {% else %}
                 <p>Update the information below for this item.</p>
             {% endif %}
@@ -58,7 +59,7 @@
                 </fieldset>
                 <div class="w3-section">
                     {{ form.submit(class="input-button w3-btn w3-grey w3-round w3-margin") }}
-                    <button type="button" class="w3-btn w3-grey w3-round w3-margin" onclick="location.href='{{ url_for('queue.display_queue') }}'">Cancel</button>
+                    <button type="button" class="w3-btn w3-grey w3-round w3-margin" onclick="location.href='{{ url_for('todo.display_todo') }}'">Cancel</button>
                 </div>
             </form>
         </div>

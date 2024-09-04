@@ -1,8 +1,9 @@
 
+{% set title="To Do - Delete Item" %}
 {% extends "base.html" %}
 {% block content %}
-    <h2>Confirm delete queue item</h2>
-    <p>Are you sure you want to remove the following item from the queue?</p>
+    <h2>Confirm delete todo item</h2>
+    <p>Are you sure you want to remove the following item from the todo?</p>
     <form method="POST" action="" class="w3-container">
         {{ form.hidden_tag() }}
         <table class="item-details">
@@ -23,7 +24,7 @@
         </table>
         <div class="w3-section">
             {{ form.submit(class="input-button w3-btn w3-grey w3-round w3-margin") }}
-            <button type="button" class="w3-btn w3-grey w3-round w3-margin" onclick="location.href='{{ url_for('queue.display_queue') }}'">No, go back.</button>
+            <button type="button" class="w3-btn w3-grey w3-round w3-margin" onclick="location.href='{{ url_for('todo.display_todo') }}'">No, go back.</button>
         </div>
     </form>
 {% endblock content %}

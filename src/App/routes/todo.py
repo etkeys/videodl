@@ -1,10 +1,10 @@
 from flask import abort, Blueprint, flash, redirect, render_template, url_for
 
-from App.forms.queue import DownloadItemDetailsForm
+from App.forms.todo import DownloadItemDetailsForm
 
-queue_blueprint = Blueprint('queue', __name__, url_prefix='/queue')
+todo_blueprint = Blueprint('todo', __name__, url_prefix='/todo')
 
-user_queue = [
+user_todo = [
         { 'Id': 1,
          'Url': 'https://example.com/1',
          'Title': 'Video #1',
@@ -19,11 +19,11 @@ user_queue = [
          'AudioOnly': False}
 ]
 
-@queue_blueprint.route('/add', methods=['GET', 'POST'])
+@todo_blueprint.route('/add', methods=['GET', 'POST'])
 def add_item():
     form = DownloadItemDetailsForm()
     if form.validate_on_submit():
-        next_id = max([i['Id'] for i in user_queue]) * 10
+        next_id = max([i['Id'] for i in user_todo]) * 10
 
         # TODO Make safe characters in title
 
@@ -33,20 +33,20 @@ def add_item():
             'AudioOnly': form.audio_only.data,
             'Url': form.url.data,
         }
-        user_queue.append(new_item)
+        user_todo.append(new_item)
         flash(f"Item '{new_item['Title']}' added successfully.", category="success")
-        return redirect(url_for('queue.display_queue'))
+        return redirect(url_for('todo.display_todo'))
     else:
-        return render_template('queue_add_edit_item.html', form=form, title="Add Item")
+        return render_template('todo_add_edit_item.html', form=form, title="Add Item")
 
-@queue_blueprint.get('/')
-def display_queue():
-    return render_template('queue.html', queue=user_queue)
+@todo_blueprint.get('/')
+def display_todo():
+    return render_template('todo.html', todo=user_todo)
 
-@queue_blueprint.get('/<id>/edit')
+@todo_blueprint.get('/<id>/edit')
 def edit_item(id: int):
     try:
-        item = next(i for i in user_queue if i['Id'] == int(id))
+        item = next(i for i in user_todo if i['Id'] == int(id))
 
         form = DownloadItemDetailsForm()
         form.title.data = item['Title']
@@ -54,41 +54,41 @@ def edit_item(id: int):
         form.url.data = item['Url']
 
         return render_template(
-            'queue_add_edit_item.html',
+            'todo_add_edit_item.html',
             form=form,
             title="Edit Item"
         )
     except StopIteration:
         abort(404, description=f"Could not find item with Id of '{id}'.")
 
-@queue_blueprint.post('/<id>/edit')
+@todo_blueprint.post('/<id>/edit')
 def edit_item_submit(id: int):
     form = DownloadItemDetailsForm()
     if form.validate_on_submit():
         try:
-            item = next(i for i in user_queue if i['Id'] == int(id))
+            item = next(i for i in user_todo if i['Id'] == int(id))
 
             item['Title'] = form.title.data
             item['AudioOnly'] = form.audio_only.data
             item['Url'] = form.url.data
 
             flash('Item updated successfully.', category="success")
-            return redirect(url_for('queue.display_queue'))
+            return redirect(url_for('todo.display_todo'))
 
         except StopIteration:
             abort(404, description=f"Could not find item with Id of '{id}'.")
 
     else:
         return render_template(
-            'queue_add_edit_item.html',
+            'todo_add_edit_item.html',
             form=form,
             title="Edit Item"
         )
 
-@queue_blueprint.get('/<id>/delete')
-def confirm_delete_queue_item(id: int):
+@todo_blueprint.get('/<id>/delete')
+def confirm_delete_todo_item(id: int):
     try:
-        item = next(i for i in user_queue if i['Id'] == int(id))
+        item = next(i for i in user_todo if i['Id'] == int(id))
 
         form = DownloadItemDetailsForm(True)
         form.title = item['Title']
@@ -96,23 +96,23 @@ def confirm_delete_queue_item(id: int):
         form.url = item['Url']
 
         return render_template(
-            'queue_delete_item.html',
+            'todo_delete_item.html',
             form=form
         )
     except StopIteration:
         abort(404, description=f"Could not find item with Id of '{id}'.")
 
-@queue_blueprint.post('/<id>/delete')
-def delete_queue_item(id: int):
+@todo_blueprint.post('/<id>/delete')
+def delete_todo_item(id: int):
     form = DownloadItemDetailsForm(True)
     if form.submit.data:
         try:
-            idx = next(i for i,x in enumerate(user_queue) if x['Id'] == int(id))
-            del user_queue[idx]
+            idx = next(i for i,x in enumerate(user_todo) if x['Id'] == int(id))
+            del user_todo[idx]
         except StopIteration:
             abort(404, description=f"Could not find item with Id of '{id}'.")
 
-        return redirect(url_for('queue.display_queue'))
+        return redirect(url_for('todo.display_todo'))
     else:
         abort(400)
 
