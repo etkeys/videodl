@@ -20,22 +20,22 @@
                         <table class="item-details">
                             <tr>
                                 <td class="item-details-label">Title</td>
-                                <td>{{ item['Title'] }}</td>
+                                <td>{{ item.title }}</td>
                             </tr>
                             <tr>
                                 <td class="item-details-label">Audio Only</td>
-                                <td>{{ item['AudioOnly'] }}</td>
+                                <td>{{ item.audio_only }}</td>
                             </tr>
                             <tr>
                                 <td class="item-details-label">URL</td>
-                                <td class="item-details-url"><a target="_blank" href="{{ item['Url'] }}" >{{ item['Url'] }}</a></td>
+                                <td class="item-details-url"><a target="_blank" href="{{ item.url }}" >{{ item.url }}</a></td>
                             </tr>
                         </table>
                     </td>
                     <td style="vertical-align: middle;">
                         <ul class="action-buttons">
-                            <li><button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('todo.edit_item', id=item['Id']) }}'">Edit</button></li>
-                            <li><button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('todo.confirm_delete_item', id=item['Id']) }}'">Delete</button></li>
+                            <li><button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('todo.edit_item', id=item.id) }}'">Edit</button></li>
+                            <li><button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('todo.confirm_delete_item', id=item.id) }}'">Delete</button></li>
                         </ul>
                     </td>
                 </tr>
