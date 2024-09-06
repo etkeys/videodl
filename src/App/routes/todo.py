@@ -27,12 +27,12 @@ def add_item():
         flash(f"Item added successfully.", category="success")
         return redirect(url_for('todo.display_todo'))
     else:
-        return render_template('todo_add_edit_item.html', form=form, title="Add Item")
+        return render_template('todo/add_edit_item.html', form=form, title="Add Item")
 
 @todo_blueprint.get('/')
 def display_todo():
     items = repo.get_todo_download_items()
-    return render_template('todo.html', todo=items)
+    return render_template('todo/index.html', todo=items)
 
 @todo_blueprint.get('/<id>/edit')
 def edit_item(id):
@@ -46,7 +46,7 @@ def edit_item(id):
     form.url.data = item.url
 
     return render_template(
-        'todo_add_edit_item.html',
+        'todo/add_edit_item.html',
         form=form,
         title="Edit Item"
     )
@@ -68,7 +68,7 @@ def edit_item_submit(id):
 
     else:
         return render_template(
-            'todo_add_edit_item.html',
+            'todo/add_edit_item.html',
             form=form,
             title="Edit Item"
         )
@@ -79,7 +79,7 @@ def confirm_delete_all():
     if len(items) < 1:
         return redirect(url_for('todo.display_todo'))
 
-    return render_template("todo_delete_all.html", num_items=len(items))
+    return render_template("todo/delete_all.html", num_items=len(items))
 
 @todo_blueprint.post('/delete')
 def delete_all():
@@ -102,7 +102,7 @@ def confirm_delete_item(id):
     form.url = item.url
 
     return render_template(
-        'todo_delete_item.html',
+        'todo/delete_item.html',
         form=form
     )
 
@@ -122,7 +122,7 @@ def confirm_submit():
     if len(items) < 1:
         return redirect(url_for('todo.display_todo'))
 
-    return render_template("todo_submit.html", num_items=len(items))
+    return render_template("todo/submit.html", num_items=len(items))
 
 @todo_blueprint.post('/submit')
 def submit():
