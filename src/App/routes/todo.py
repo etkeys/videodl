@@ -32,6 +32,7 @@ def add_item():
 @todo_blueprint.get('/')
 def display_todo():
     items = repo.get_todo_download_items()
+    items.sort(key=(lambda i: i.added_datetime))
     return render_template('todo/index.html', todo=items)
 
 @todo_blueprint.get('/<id>/edit')
