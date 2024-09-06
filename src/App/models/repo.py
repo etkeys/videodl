@@ -57,6 +57,12 @@ class Repository(object):
     def get_todo_download_item_by_id(self, id):
         return next((i for i in download_items if i.id == id and i.status == DownloadItemStatus.TODO), None)
 
+    def submit_todo_items(self):
+        ds = self.get_todo_download_set()
+        ds.status = DownloadSetStatus.QUEUED
+        for item in self.get_todo_download_items():
+            item.status = DownloadItemStatus.QUEUED
+
 repo = Repository()
 
 # print(repo._download_sets)

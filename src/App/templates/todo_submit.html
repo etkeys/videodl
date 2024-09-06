@@ -1,0 +1,10 @@
+{% set title="To Do - Submit Items" %}
+{% extends "base.html" %}
+{% block content %}
+    <h2>Confirm submission of items for download.</h2>
+    <p>Are you sure you want submit {{ num_items }} for download?</p>
+    <form method="POST" action="{{ url_for('todo.submit') }}" class="w3-container">
+        <input type="submit" class="input-button w3-btn w3-grey w3-round w3-magin" value="Yes, I'm sure."/>
+        <button type="button" class="w3-btn w3-grey w3-round w3-margin" onclick="location.href='{{ url_for('todo.display_todo') }}'">No, go back.</button>
+    </form>
+{% endblock content %}

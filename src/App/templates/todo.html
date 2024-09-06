@@ -1,49 +1,53 @@
 {% set title="To Do" %}
 {% extends "base.html" %}
 {% block content %}
-    <p>These are the items to be downloaded once submitted.</p>
-    <div class="w3-section">
-        <button type="button" class="w3-btn w3-grey w3-round w3-margin" onclick="location.href='{{ url_for('todo.add_item') }}'">Add</button>
-        <button type="button" class="w3-btn w3-grey w3-round w3-margin" onclick="location.href='{{ url_for('todo.confirm_delete_all') }}'">Clear All</button>
-    </div>
-    <div class="w3-row">
-        <table class="w3-twothird w3-table w3-bordered">
-            <tr>
-                <th>Item</th>
-                <th>Details</th>
-                <th>Actions</th>
-            </tr>
-            {% for item in todo %}
+    <div class="w3-row"></div>
+        <div class="w3-twothird">
+            <p>These are the items to be downloaded once submitted.</p>
+            <div class="w3-section">
+                <button type="button" class="w3-btn w3-grey w3-round w3-margin" onclick="location.href='{{ url_for('todo.add_item') }}'">Add</button>
+                <button type="button" class="w3-btn w3-grey w3-round w3-margin" onclick="location.href='{{ url_for('todo.confirm_delete_all') }}'">Clear All</button>
+                <button type="button" class="w3-btn w3-grey w3-round w3-margin w3-right" onclick="location.href='{{ url_for('todo.confirm_submit') }}'">Submit</button>
+            </div>
+            <table class="w3-table w3-bordered">
                 <tr>
-                    <td style="vertical-align: middle;">{{ loop.index }}</td>
-                    <td style="vertical-align: middle;">
-                        <table class="item-details">
-                            <tr>
-                                <td class="item-details-label">Title</td>
-                                <td>{{ item.title }}</td>
-                            </tr>
-                            <tr>
-                                <td class="item-details-label">Audio Only</td>
-                                <td>{{ item.audio_only }}</td>
-                            </tr>
-                            <tr>
-                                <td class="item-details-label">URL</td>
-                                <td class="item-details-url"><a target="_blank" href="{{ item.url }}" >{{ item.url }}</a></td>
-                            </tr>
-                        </table>
-                    </td>
-                    <td style="vertical-align: middle;">
-                        <ul class="action-buttons">
-                            <li><button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('todo.edit_item', id=item.id) }}'">Edit</button></li>
-                            <li><button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('todo.confirm_delete_item', id=item.id) }}'">Delete</button></li>
-                        </ul>
-                    </td>
+                    <th>Item</th>
+                    <th>Details</th>
+                    <th>Actions</th>
                 </tr>
-            {% endfor %}
-        </table>
-    </div>
-    <div class="w3-section">
-        <button type="button" class="w3-btn w3-grey w3-round w3-margin" onclick="location.href='{{ url_for('todo.add_item') }}'">Add</button>
-        <button type="button" class="w3-btn w3-grey w3-round w3-margin" onclick="location.href='{{ url_for('todo.confirm_delete_all') }}'">Clear All</button>
+                {% for item in todo %}
+                    <tr>
+                        <td style="vertical-align: middle;">{{ loop.index }}</td>
+                        <td style="vertical-align: middle;">
+                            <table class="item-details">
+                                <tr>
+                                    <td class="item-details-label">Title</td>
+                                    <td>{{ item.title }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="item-details-label">Audio Only</td>
+                                    <td>{{ item.audio_only }}</td>
+                                </tr>
+                                <tr>
+                                    <td class="item-details-label">URL</td>
+                                    <td class="item-details-url"><a target="_blank" href="{{ item.url }}" >{{ item.url }}</a></td>
+                                </tr>
+                            </table>
+                        </td>
+                        <td style="vertical-align: middle;">
+                            <ul class="action-buttons">
+                                <li><button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('todo.edit_item', id=item.id) }}'">Edit</button></li>
+                                <li><button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('todo.confirm_delete_item', id=item.id) }}'">Delete</button></li>
+                            </ul>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <div class="w3-section">
+                <button type="button" class="w3-btn w3-grey w3-round w3-margin" onclick="location.href='{{ url_for('todo.add_item') }}'">Add</button>
+                <button type="button" class="w3-btn w3-grey w3-round w3-margin" onclick="location.href='{{ url_for('todo.confirm_delete_all') }}'">Clear All</button>
+                <button type="button" class="w3-btn w3-grey w3-round w3-margin w3-right" onclick="location.href='{{ url_for('todo.confirm_submit') }}'">Submit</button>
+            </div>
+        </div>
     </div>
 {% endblock content %}

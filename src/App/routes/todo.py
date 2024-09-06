@@ -116,3 +116,15 @@ def delete_item(id):
     else:
         abort(400)
 
+@todo_blueprint.get('/submit')
+def confirm_submit():
+    items = repo.get_todo_download_items()
+    if len(items) < 1:
+        return redirect(url_for('todo.display_todo'))
+
+    return render_template("todo_submit.html", num_items=len(items))
+
+@todo_blueprint.post('/submit')
+def submit():
+    repo.submit_todo_items()
+    return redirect(url_for('core.root'))
