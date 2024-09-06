@@ -29,6 +29,10 @@ footer {
     font-family: monospace;
 }
 
+#active-nav-item {
+    background-color: #4f0d29;
+}
+
 button a {
     cursor: inherit;
     text-decoration: none;
