@@ -1,0 +1,43 @@
+{% set active_nav_item = "downloads" %}
+{% set title="Downloads" %}
+{% extends "base.html" %}
+{% block content %}
+    <div class="w3-row"></div>
+        <div class="w3-twothird">
+            <p>These are the groups of items that you've requested to be downloaded or can submit for downloading.</p>
+            <table class="w3-table w3-bordered">
+                <tr>
+                    <th>Number</th>
+                    <th>Details</th>
+                    <th>Action</th>
+                </tr>
+                {% for item in downloads %}
+                    <tr>
+                        <td style="vertical-align: middle;">{{ loop.index }}</td>
+                        <td style="vertical-align: middle;">
+                            <table class="item-details">
+                                {% for prop_name, prop_val in item.get_properties_for_display() %}
+                                    <tr>
+                                        <td class="item-details-label">{{ prop_name }}</td>
+                                        <td>{{ prop_val }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </td>
+                        <td style="vertical-align: middle;">
+                            <ul class="action-buttons">
+                                <li>
+                                    {% if item.status | is_ds_status_todo %}
+                                        <button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('todo.display_todo') }}'">Edit</button>
+                                    {% else %}
+                                        <button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('downloads.view_download_set', id=item.id) }}'">View</button>
+                                    {% endif %}
+                                </li>
+                            </ul>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+{% endblock content %}

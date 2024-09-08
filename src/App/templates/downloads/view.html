@@ -1,0 +1,42 @@
+{% set active_nav_item = "downloads" %}
+{% set meta_auto_refresh = "60" %}
+{% set title="View Download Set" %}
+{% extends "base.html" %}
+{% block content %}
+    <div class="w3-row"></div>
+        <div class="w3-twothird">
+            <p>Details for Download Set created on {{ download_set.created_datetime | datetime_to_display }}.</p>
+            <h3>Download Set:</h3>
+            <table class="item-details">
+                {% for prop_name, prop_val in download_set.get_properties_for_display() %}
+                    <tr>
+                        <td class="item-details-label">{{ prop_name }}</td>
+                        <td>{{ prop_val }}</td>
+                    </tr>
+                {% endfor %}
+            </table>
+            <h3>Items in Set:</h3>
+            <table class="w3-table w3-bordered">
+                <tr>
+                    <th>Number</th>
+                    <th>Details</th>
+                </tr>
+                {% for item in download_items %}
+                    <tr>
+                        <td style="vertical-align: middle;">{{ loop.index }}</td>
+                        <td style="vertical-align: middle;">
+                            <table class="item-details">
+                                {% for prop_name, prop_val in item.get_properties_for_display() %}
+                                    <tr>
+                                        <td class="item-details-label">{{ prop_name }}</td>
+                                        <td>{{ prop_val }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </table>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+{% endblock content %}
