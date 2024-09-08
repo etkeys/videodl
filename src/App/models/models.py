@@ -2,6 +2,8 @@ from datetime import datetime, timezone
 import enum
 import uuid
 
+from App import utils
+
 class DownloadItem(object):
     id = None
     status = None
@@ -24,8 +26,7 @@ class DownloadItem(object):
         self.status = kwargs.get('status', DownloadItemStatus.TODO)
         self.title = kwargs.get('title', self.id)
         self.audio_only = kwargs.get('audio_only', False)
-
-        self.added_datetime = datetime.now(timezone.utc)
+        self.added_datetime = kwargs.get('added_datetime', datetime.now(timezone.utc))
 
     def __repr__(self):
         return f"DownloadItem('{self.id}', '{self.url}', '{self.title}', audio_only={self.audio_only})"
@@ -33,12 +34,24 @@ class DownloadItem(object):
 class DownloadSet(object):
     id = None
     status = None
-    created_date = None
+    created_datetime = None
+    queued_datetime = None
+    completed_datetime = None
 
     def __init__(self, **kwargs):
         self.id = kwargs.get('id', str(uuid.uuid4()))
         self.status = kwargs.get('status', DownloadSetStatus.TODO)
-        self.created_date = datetime.now(timezone.utc)
+        self.created_datetime = kwargs.get('created_datetime', datetime.now(timezone.utc))
+        self.queued_datetime = kwargs.get('queued_datetime', None)
+        self.completed_datetime = kwargs.get('completed_datetime', None)
+
+    def get_properties_for_display(self):
+        return [
+            ('Status', str(self.status)),
+            ('Created', utils.maybe_datetime_to_display_string(self.created_datetime)),
+            ('Queued', utils.maybe_datetime_to_display_string(self.queued_datetime)),
+            ('Completed', utils.maybe_datetime_to_display_string(self.completed_datetime))
+        ]
 
 class DownloadItemStatus(enum.Enum):
     TODO = 0
@@ -53,6 +66,10 @@ class DownloadSetStatus(enum.Enum):
     QUEUED = 1
     PROCESSING = 2
     COMPLETED = 3
+
+    def __str__(self):
+        return self.name
+
 
 # Taken from stackoverflow (by Martin Thoma)
 # https://stackoverflow.com/a/33245493

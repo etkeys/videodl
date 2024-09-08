@@ -1,19 +1,55 @@
 
 from .models import *
 
-download_sets = [DownloadSet()]
+import uuid
+from datetime import datetime, timezone, timedelta
+_init_datetime = datetime.now(timezone.utc)
+download_sets = [
+        DownloadSet(
+            id=str(uuid.uuid4()),
+            status=DownloadSetStatus.COMPLETED,
+            created_datetime=_init_datetime - timedelta(days=3),
+            queued_datetime=_init_datetime - timedelta(days=2, hours=23),
+            completed_datetime=_init_datetime - timedelta(days=2, hours=21),
+        ),
+        DownloadSet(
+            id=str(uuid.uuid4()),
+            status=DownloadSetStatus.PROCESSING,
+            created_datetime=_init_datetime - timedelta(days=2),
+            queued_datetime=_init_datetime - timedelta(days=1, hours=16)
+        ),
+        DownloadSet()
+    ]
 download_items = [
     DownloadItem(
         download_set_id=download_sets[0].id,
+        url='https://foo.com/1',
+        title='Download set 1 #1',
+        added_datetime=_init_datetime - timedelta(days=2, hours=23, minutes=30)
+    ),
+    DownloadItem(
+        download_set_id=download_sets[1].id,
+        url='https://bar.com/1',
+        title='Download set 2 #1',
+        added_datetime=_init_datetime - timedelta(days=1, hours=23, minutes=30)
+    ),
+    DownloadItem(
+        download_set_id=download_sets[1].id,
+        url='https://bar.com/2',
+        title='Download set 2 #2',
+        added_datetime=_init_datetime - timedelta(days=1, hours=20, minutes=43)
+    ),
+    DownloadItem(
+        download_set_id=download_sets[2].id,
         url='https://example.com/1',
         title='Video #1',
         audio_only=True),
     DownloadItem(
-        download_set_id=download_sets[0].id,
+        download_set_id=download_sets[2].id,
         url='https://example.com/2',
         title='Video #2'),
     DownloadItem(
-        download_set_id=download_sets[0].id,
+        download_set_id=download_sets[2].id,
         url='https://example.com/3',
         title='Video #3')
 ]
@@ -43,6 +79,12 @@ class Repository(object):
         if idx is not None:
             del download_items[idx]
 
+    def get_download_sets(self):
+        return [i for i in download_sets]
+
+    def get_download_items(self, download_set_id):
+        return [i for i in download_items if i.download_set_id == download_set_id]
+
     def get_todo_download_set(self):
         result = next((ds for ds in download_sets if ds.status == DownloadSetStatus.TODO), None)
         if result is None:
@@ -64,7 +106,4 @@ class Repository(object):
             item.status = DownloadItemStatus.QUEUED
 
 repo = Repository()
-
-# print(repo._download_sets)
-# print(repo._download_items)
 
