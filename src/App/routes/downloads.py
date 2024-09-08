@@ -1,6 +1,6 @@
 from flask import abort, Blueprint, flash, redirect, render_template, url_for
 
-from App.models import DownloadSet, repo
+from App.models import DownloadSet, DownloadSetStatus, repo
 
 downloads_blueprint = Blueprint("downloads", __name__, url_prefix='/downloads')
 
@@ -24,16 +24,22 @@ def view_download_set(id):
     items.sort(key=(lambda i: i.added_datetime))
     return render_template('downloads/view.html', download_set=ds, download_items=items)
 
+@downloads_blueprint.app_template_filter('is_ds_status_todo')
+def is_download_set_status_todo(status: DownloadSetStatus):
+    return status == DownloadSetStatus.TODO
+
 class DownloadSetDetailsViewModel(object):
     _download_set = None
     _count_download_items = 0
     id = None
+    status = None
 
     def __init__(self, download_set: DownloadSet, count_download_items: int):
         self._download_set = download_set
         self._count_download_items = count_download_items
 
         self.id = download_set.id
+        self.status = download_set.status
 
     def get_properties_for_display(self):
         return [
