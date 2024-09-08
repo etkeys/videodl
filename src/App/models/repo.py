@@ -25,19 +25,36 @@ download_items = [
         download_set_id=download_sets[0].id,
         url='https://foo.com/1',
         title='Download set 1 #1',
-        added_datetime=_init_datetime - timedelta(days=2, hours=23, minutes=30)
+        added_datetime=_init_datetime - timedelta(days=2, hours=23, minutes=30),
+        status=DownloadItemStatus.FAILED
     ),
     DownloadItem(
         download_set_id=download_sets[1].id,
         url='https://bar.com/1',
         title='Download set 2 #1',
-        added_datetime=_init_datetime - timedelta(days=1, hours=23, minutes=30)
+        added_datetime=_init_datetime - timedelta(days=1, hours=23, minutes=30),
+        status=DownloadItemStatus.COMPLETED
     ),
     DownloadItem(
         download_set_id=download_sets[1].id,
         url='https://bar.com/2',
         title='Download set 2 #2',
-        added_datetime=_init_datetime - timedelta(days=1, hours=20, minutes=43)
+        added_datetime=_init_datetime - timedelta(days=1, hours=20, minutes=43),
+        status=DownloadItemStatus.FAILED
+    ),
+    DownloadItem(
+        download_set_id=download_sets[1].id,
+        url='https://bar.com/3',
+        title='Download set 2 #3',
+        added_datetime=_init_datetime - timedelta(days=1, hours=20, minutes=16),
+        status=DownloadItemStatus.DOWNLOADING
+    ),
+    DownloadItem(
+        download_set_id=download_sets[1].id,
+        url='https://bar.com/4',
+        title='Download set 2 #4',
+        added_datetime=_init_datetime - timedelta(days=1, hours=19, minutes=57),
+        status=DownloadItemStatus.QUEUED
     ),
     DownloadItem(
         download_set_id=download_sets[2].id,
@@ -78,6 +95,9 @@ class Repository(object):
         idx = next((i for i,x in enumerate(download_items) if x.id == id), None)
         if idx is not None:
             del download_items[idx]
+
+    def get_download_set_by_id(self, id):
+        return next((i for i in download_sets if i.id == id), None)
 
     def get_download_sets(self):
         return [i for i in download_sets]

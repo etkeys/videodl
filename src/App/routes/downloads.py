@@ -15,9 +15,14 @@ def display_downloads():
     return render_template('downloads/index.html', downloads=vms)
 
 
-@downloads_blueprint.get('/<id>/view_items')
-def view_items(id):
-    abort(501)
+@downloads_blueprint.get('/<id>/view')
+def view_download_set(id):
+    ds = repo.get_download_set_by_id(id)
+    if ds is None:
+        abort(404, f"Could not find download set with Id '{id}'.")
+    items = repo.get_download_items(id)
+    items.sort(key=(lambda i: i.added_datetime))
+    return render_template('downloads/view.html', download_set=ds, download_items=items)
 
 class DownloadSetDetailsViewModel(object):
     _download_set = None

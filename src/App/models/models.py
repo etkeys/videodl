@@ -31,6 +31,14 @@ class DownloadItem(object):
     def __repr__(self):
         return f"DownloadItem('{self.id}', '{self.url}', '{self.title}', audio_only={self.audio_only})"
 
+    def get_properties_for_display(self):
+        return [
+            ('Title', self.title),
+            ('Audio Only', 'Yes' if self.audio_only else 'No'),
+            ('URL', self.url),
+            ('Status', self.status)
+        ]
+
 class DownloadSet(object):
     id = None
     status = None
@@ -60,6 +68,9 @@ class DownloadItemStatus(enum.Enum):
     FINALIZING = 3
     COMPLETED = 4
     FAILED = 5
+
+    def __str__(self):
+        return self.name
 
 class DownloadSetStatus(enum.Enum):
     TODO = 0

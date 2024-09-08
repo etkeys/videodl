@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
     <head>
+        {% if meta_auto_refresh %}
+            <meta http-equiv="refresh" content="{{ meta_auto_refresh }}" />
+        {% endif %}
+
         <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> 
         <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-colors-2019.css">
         <link rel="stylesheet" href="{{ url_for('static', filename='font-awesome/css/font-awesome.min.css') }}">
