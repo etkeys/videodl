@@ -6,3 +6,5 @@
 - Admin users need a way to view if there are any downloads in progress so they
   can know if it is safe to make system wide changes.
 - Admin users need a way to tell the system to not process any new download sets.
+
+- Admin users should be able to view the logs of failed items
