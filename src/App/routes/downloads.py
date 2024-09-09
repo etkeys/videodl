@@ -8,12 +8,7 @@ downloads_blueprint = Blueprint("downloads", __name__, url_prefix='/downloads')
 def display_downloads():
     sets = repo.get_download_sets()
     sets.sort(reverse=True, key=(lambda s: s.created_datetime))
-    vms = []
-    for ds in sets:
-        count_items = len(repo.get_download_items(ds.id))
-        vms.append(DownloadSetDetailsViewModel(ds, count_items))
-    return render_template('downloads/index.html', downloads=vms)
-
+    return render_template('downloads/index.html', download_sets=sets)
 
 @downloads_blueprint.get('/<id>/view')
 def view_download_set(id):
@@ -28,20 +23,6 @@ def view_download_set(id):
 def is_download_set_status_todo(status: DownloadSetStatus):
     return status == DownloadSetStatus.TODO
 
-class DownloadSetDetailsViewModel(object):
-    _download_set = None
-    _count_download_items = 0
-    id = None
-    status = None
-
-    def __init__(self, download_set: DownloadSet, count_download_items: int):
-        self._download_set = download_set
-        self._count_download_items = count_download_items
-
-        self.id = download_set.id
-        self.status = download_set.status
-
-    def get_properties_for_display(self):
-        return [
-            ('Items', self._count_download_items)
-        ] + self._download_set.get_properties_for_display()
+@downloads_blueprint.app_template_filter('count_items_in_ds')
+def count_items_in_download_set(ds: DownloadSet):
+    return repo.count_items_in_download_set(ds.id)

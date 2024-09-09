@@ -11,11 +11,15 @@
                     <th>Details</th>
                     <th>Action</th>
                 </tr>
-                {% for item in downloads %}
+                {% for item in download_sets %}
                     <tr>
                         <td style="vertical-align: middle;">{{ loop.index }}</td>
                         <td style="vertical-align: middle;">
                             <table class="item-details">
+                                <tr>
+                                    <td class="item-details-label"> Items</td>
+                                    <td>{{ item | count_items_in_ds }}</td>
+                                </tr>
                                 {% for prop_name, prop_val in item.get_properties_for_display() %}
                                     <tr>
                                         <td class="item-details-label">{{ prop_name }}</td>

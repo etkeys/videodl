@@ -86,6 +86,9 @@ class Repository(object):
 
         download_items.append(item)
 
+    def count_items_in_download_set(self, download_set_id):
+        return len(self.get_download_items(download_set_id))
+
     def delete_todo_download_items(self):
         items = self.get_todo_download_items()
         for item in items:
