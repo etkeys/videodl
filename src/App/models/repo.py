@@ -29,6 +29,13 @@ download_items = [
         status=DownloadItemStatus.FAILED
     ),
     DownloadItem(
+        download_set_id=download_sets[0].id,
+        url='https://foo.com/2',
+        title='Download set 1 #2',
+        added_datetime=_init_datetime - timedelta(days=2, hours=23, minutes=23),
+        status=DownloadItemStatus.FAILED
+    ),
+    DownloadItem(
         download_set_id=download_sets[1].id,
         url='https://bar.com/1',
         title='Download set 2 #1',
@@ -74,17 +81,30 @@ download_items = [
 class Repository(object):
 
     def add_todo_download_item(self, item: DownloadItem):
-        if item.status != DownloadItemStatus.TODO:
+        if not item.is_todo():
             raise ValueError('Can only add new item if it is in "TODO" status.')
         ds = next((i for i in download_sets if i.id == item.download_set_id), None)
         if ds is None:
             raise ValueError(f"DownloadSet (ID: {item.download_set_id}) does not exist.")
-        if ds.status != DownloadSetStatus.TODO:
+        if not ds.is_todo():
             raise ValueError(f'Cannot add item to DownloadSet not in "TODO" status.')
         if next((i for i in download_items if i.id == item.id), None) != None:
             raise ValueError(f'Item already exists')
 
         download_items.append(item)
+
+    def copy_download_item_to_todo(self, item: DownloadItem):
+        if next((i for i in self.get_todo_download_items() if i.copied_from_id == item.id), None):
+            return
+
+        new_item = DownloadItem(
+            download_set_id=repo.get_todo_download_set().id,
+            url=item.url,
+            title=item.title,
+            audio_only=item.audio_only,
+            copied_from_id=item.id
+        )
+        download_items.append(new_item)
 
     def count_items_in_download_set(self, download_set_id):
         return len(self.get_download_items(download_set_id))
@@ -105,8 +125,18 @@ class Repository(object):
     def get_download_sets(self):
         return [i for i in download_sets]
 
-    def get_download_items(self, download_set_id):
-        return [i for i in download_items if i.download_set_id == download_set_id]
+    def get_download_items(self, download_set_id, where = None):
+        result = [i for i in download_items if i.download_set_id == download_set_id]
+        if not where is None:
+            result = filter(where, result)
+        return list(result)
+
+    def get_download_items_failed(self, download_set_id):
+        return [i for i in download_items if i.download_set_id == download_set_id and
+                                                i.is_failed()]
+
+    def get_download_item_by_id(self, item_id):
+        return next((i for i in download_items if i.id == item_id), None)
 
     def get_todo_download_set(self):
         result = next((ds for ds in download_sets if ds.status == DownloadSetStatus.TODO), None)
@@ -121,6 +151,9 @@ class Repository(object):
 
     def get_todo_download_item_by_id(self, id):
         return next((i for i in download_items if i.id == id and i.status == DownloadItemStatus.TODO), None)
+
+    def is_item_copied_to_todo(self, item: DownloadItem):
+        return True if next((i for i in download_items if i.copied_from_id == item.id), None) else False
 
     def submit_todo_items(self):
         ds = self.get_todo_download_set()

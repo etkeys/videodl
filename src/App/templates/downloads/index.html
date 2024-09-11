@@ -31,7 +31,7 @@
                         <td style="vertical-align: middle;">
                             <ul class="action-buttons">
                                 <li>
-                                    {% if item.status | is_ds_status_todo %}
+                                    {% if item.is_todo() %}
                                         <button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('todo.display_todo') }}'">Edit</button>
                                     {% else %}
                                         <button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('downloads.view_download_set', id=item.id) }}'">View</button>

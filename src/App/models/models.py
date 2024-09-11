@@ -12,6 +12,7 @@ class DownloadItem(object):
     url = None
     added_datetime = None
     download_set_id = None
+    copied_from_id = None
 
     def __init__(self, download_set_id, url, **kwargs):
         if download_set_id is None or not is_valid_uuid(download_set_id):
@@ -27,6 +28,7 @@ class DownloadItem(object):
         self.title = kwargs.get('title', self.id)
         self.audio_only = kwargs.get('audio_only', False)
         self.added_datetime = kwargs.get('added_datetime', datetime.now(timezone.utc))
+        self.copied_from_id = kwargs.get('copied_from_id', None)
 
     def __repr__(self):
         return f"DownloadItem('{self.id}', '{self.url}', '{self.title}', audio_only={self.audio_only})"
@@ -38,6 +40,12 @@ class DownloadItem(object):
             ('URL', self.url),
             ('Status', self.status)
         ]
+
+    def is_failed(self):
+        return self.status == DownloadItemStatus.FAILED
+
+    def is_todo(self):
+        return self.status == DownloadItemStatus.TODO
 
 class DownloadSet(object):
     id = None
@@ -60,6 +68,12 @@ class DownloadSet(object):
             ('Queued', utils.maybe_datetime_to_display_string(self.queued_datetime)),
             ('Completed', utils.maybe_datetime_to_display_string(self.completed_datetime))
         ]
+
+    def is_completed(self):
+        return self.status == DownloadSetStatus.COMPLETED
+
+    def is_todo(self):
+        return self.status == DownloadSetStatus.TODO
 
 class DownloadItemStatus(enum.Enum):
     TODO = 0
