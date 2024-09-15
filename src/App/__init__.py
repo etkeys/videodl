@@ -1,7 +1,16 @@
 from flask import Flask
+from flask_bcrypt import Bcrypt
+from flask_login import LoginManager
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'develop'
+app.config['SESSION_PROTECTION'] = 'strong'
+
+bcrypt = Bcrypt(app)
+login_manager = LoginManager(app)
+login_manager.login_message = 'You must authenticate to access this page.'
+login_manager.login_message_category = 'warning'
+login_manager.login_view = 'core.authenticate'
 
 from App import utils
 

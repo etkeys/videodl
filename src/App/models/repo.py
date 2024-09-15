@@ -1,9 +1,27 @@
 
 from .models import *
 
+from App import bcrypt, login_manager
+
+
 import uuid
 from datetime import datetime, timezone, timedelta
 _init_datetime = datetime.now(timezone.utc)
+users = [
+    User(
+        email="alice@example.com",
+        name="Alice",
+        access_token=bcrypt.generate_password_hash('7a3d99b983ca418b85a69c7c56778cd5').decode('utf-8'),
+        is_admin=True,
+        id='d6c8cbb6-9ab6-4f36-b933-9b6ee8a471b8'
+    ),
+    User(
+        email="bob@example.com",
+        name="Bob",
+        access_token=bcrypt.generate_password_hash('7b330012fd834268945a90717e7a06d0').decode('utf-8'),
+        id='6fb66c6b-9592-48da-affa-6fa887f241a6'
+    ),
+]
 download_sets = [
         DownloadSet(
             id=str(uuid.uuid4()),
@@ -152,6 +170,13 @@ class Repository(object):
     def get_todo_download_item_by_id(self, id):
         return next((i for i in download_items if i.id == id and i.status == DownloadItemStatus.TODO), None)
 
+    def get_user_by_id(self, id):
+        return next((i for i in users if i.id == id), None)
+
+    def get_user_by_name(self, name):
+        name = name.casefold()
+        return next((i for i in users if i.name.casefold() == name), None)
+
     def is_item_copied_to_todo(self, item: DownloadItem):
         return True if next((i for i in download_items if i.copied_from_id == item.id), None) else False
 
@@ -163,3 +188,6 @@ class Repository(object):
 
 repo = Repository()
 
+@login_manager.user_loader
+def load_user(user_id):
+    return repo.get_user_by_id(user_id)

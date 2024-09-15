@@ -1,0 +1,58 @@
+{% set title="Authenticate" %}
+{% set class_input="w3-input w3-left" %}
+{% set class_invalid_input="w3-input w3-topbar w3-bottombar w3-leftbar w3-rightbar w3-border-red" %}
+{% set class_invalid_message="w3-margin-left w3-text-red" %}
+{% extends "base.html" %}
+{% block content %}
+Alice: 7a3d99b983ca418b85a69c7c56778cd5
+<BR/>
+Bob: 7b330012fd834268945a90717e7a06d0
+    <div class="w3-row">
+        <div class="w3-twothird">
+            <form method="POST" action="" class="w3-container">
+                {{ form.hidden_tag() }}
+                <fieldset>
+                    <table>
+                        <tr style="visibility: collapse;">
+                            <td style="width: 10em;">&nbsp;</td>
+                            <td style="width: 100%;">&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td class="item-details-label">{{ form.user_name.label }}</td>
+                            <td>
+                                {% if form.user_name.errors %}
+                                    {{ form.user_name(class=class_invalid_input) }}
+                                    <div class="{{ class_invalid_message }}">
+                                        {% for error in form.user_name.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.user_name(class=class_input) }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="item-details-label">{{ form.access_token.label }}</td>
+                            <td>
+                                {% if form.access_token.errors %}
+                                    {{ form.access_token(class=class_invalid_input) }}
+                                    <div class="{{ class_invalid_message }}">
+                                        {% for error in form.access_token.errors %}
+                                            <span>{{ error }}</span>
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.access_token(class=class_input) }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </table>
+                </fieldset>
+                <div class="w3-section">
+                    {{ form.submit(class="input-button w3-btn w3-grey w3-round w3-margin") }}
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

@@ -2,7 +2,26 @@ from datetime import datetime, timezone
 import enum
 import uuid
 
+from flask_login import UserMixin
+
 from App import utils
+
+class User(UserMixin):
+    id = None
+    email = None
+    name = None
+    access_token = None
+    is_admin = None
+
+    def __init__(self, email, name, access_token, is_admin = False, **kwargs):
+        self.id = kwargs.get('id', str(uuid.uuid4()))
+        self.email = email
+        self.name = name
+        self.access_token = access_token
+        self.is_admin = is_admin
+
+    def __repr__(self):
+        return f"('{self.name}', '{self.email}')"
 
 class DownloadItem(object):
     id = None

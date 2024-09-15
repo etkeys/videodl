@@ -1,10 +1,12 @@
 from flask import abort, Blueprint, flash, redirect, render_template, url_for
+from flask_login import login_required
 
 from App.models import DownloadItem, DownloadItemStatus, DownloadSet, DownloadSetStatus, repo
 
 downloads_blueprint = Blueprint("downloads", __name__, url_prefix='/downloads')
 
 @downloads_blueprint.post('/<download_set_id>/add_failed_to_todo/<item_id>')
+@login_required
 def add_failed_item_to_todo(download_set_id, item_id):
     ds = repo.get_download_set_by_id(download_set_id)
     if ds is None:
@@ -25,6 +27,7 @@ def add_failed_item_to_todo(download_set_id, item_id):
     return redirect(url_for('downloads.view_download_set', id=download_set_id))
 
 @downloads_blueprint.post('/<download_set_id>/add_failed_to_todo')
+@login_required
 def add_all_failed_items_to_todo(download_set_id):
     for item in repo.get_download_items_failed(download_set_id):
         repo.copy_download_item_to_todo(item)
@@ -32,12 +35,14 @@ def add_all_failed_items_to_todo(download_set_id):
     return redirect(url_for('downloads.view_download_set', id=download_set_id))
 
 @downloads_blueprint.get('/')
+@login_required
 def display_downloads():
     sets = repo.get_download_sets()
     sets.sort(reverse=True, key=(lambda s: s.created_datetime))
     return render_template('downloads/index.html', download_sets=sets)
 
 @downloads_blueprint.get('/<id>/view')
+@login_required
 def view_download_set(id):
     ds = repo.get_download_set_by_id(id)
     if ds is None:

@@ -1,4 +1,5 @@
 from flask import abort, Blueprint, flash, redirect, render_template, url_for
+from flask_login import login_required
 
 from App.forms.todo import DownloadItemDetailsForm
 from App.models import DownloadItem, repo
@@ -6,6 +7,7 @@ from App.models import DownloadItem, repo
 todo_blueprint = Blueprint('todo', __name__, url_prefix='/todo')
 
 @todo_blueprint.route('/add', methods=['GET', 'POST'])
+@login_required
 def add_item():
     form = DownloadItemDetailsForm()
     if form.validate_on_submit():
@@ -30,12 +32,14 @@ def add_item():
         return render_template('todo/add_edit_item.html', form=form, title="Add Item")
 
 @todo_blueprint.get('/')
+@login_required
 def display_todo():
     items = repo.get_todo_download_items()
     items.sort(key=(lambda i: i.added_datetime))
     return render_template('todo/index.html', todo=items)
 
 @todo_blueprint.get('/<id>/edit')
+@login_required
 def edit_item(id):
     item = repo.get_todo_download_item_by_id(id)
     if item is None:
@@ -53,6 +57,7 @@ def edit_item(id):
     )
 
 @todo_blueprint.post('/<id>/edit')
+@login_required
 def edit_item_submit(id):
     form = DownloadItemDetailsForm()
     if form.validate_on_submit():
@@ -75,6 +80,7 @@ def edit_item_submit(id):
         )
 
 @todo_blueprint.get('/delete')
+@login_required
 def confirm_delete_all():
     items = repo.get_todo_download_items()
     if len(items) < 1:
@@ -83,6 +89,7 @@ def confirm_delete_all():
     return render_template("todo/delete_all.html", num_items=len(items))
 
 @todo_blueprint.post('/delete')
+@login_required
 def delete_all():
     items = repo.get_todo_download_items()
     if len(items) > 0:
@@ -92,6 +99,7 @@ def delete_all():
 
 
 @todo_blueprint.get('/<id>/delete')
+@login_required
 def confirm_delete_item(id):
     item = repo.get_todo_download_item_by_id(id)
     if item is None:
@@ -108,6 +116,7 @@ def confirm_delete_item(id):
     )
 
 @todo_blueprint.post('/<id>/delete')
+@login_required
 def delete_item(id):
     form = DownloadItemDetailsForm(True)
     if form.submit.data:
@@ -118,6 +127,7 @@ def delete_item(id):
         abort(400)
 
 @todo_blueprint.get('/submit')
+@login_required
 def confirm_submit():
     items = repo.get_todo_download_items()
     if len(items) < 1:
@@ -126,6 +136,7 @@ def confirm_submit():
     return render_template("todo/submit.html", num_items=len(items))
 
 @todo_blueprint.post('/submit')
+@login_required
 def submit():
     repo.submit_todo_items()
     return redirect(url_for('core.root'))
