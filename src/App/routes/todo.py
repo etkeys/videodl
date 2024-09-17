@@ -1,5 +1,5 @@
 from flask import abort, Blueprint, flash, redirect, render_template, url_for
-from flask_login import login_required
+from flask_login import current_user, login_required
 
 from App.forms.todo import DownloadItemDetailsForm
 from App.models import DownloadItem, repo
@@ -13,7 +13,7 @@ def add_item():
     if form.validate_on_submit():
         # TODO Make safe characters in title
 
-        ds_id = repo.get_todo_download_set().id
+        ds_id = repo.get_todo_download_set(current_user.id).id
 
         new_item = DownloadItem(
             download_set_id=ds_id,
@@ -22,7 +22,7 @@ def add_item():
             audio_only=form.audio_only.data)
 
         try:
-            repo.add_todo_download_item(new_item)
+            repo.add_todo_download_item(current_user.id, new_item)
         except ValueError as e:
             abort(400, f"Could not add new item: {repr(e)}.")
 
@@ -34,14 +34,14 @@ def add_item():
 @todo_blueprint.get('/')
 @login_required
 def display_todo():
-    items = repo.get_todo_download_items()
+    items = repo.get_todo_download_items(current_user.id)
     items.sort(key=(lambda i: i.added_datetime))
     return render_template('todo/index.html', todo=items)
 
 @todo_blueprint.get('/<id>/edit')
 @login_required
 def edit_item(id):
-    item = repo.get_todo_download_item_by_id(id)
+    item = repo.get_todo_download_item_by_id(current_user.id, id)
     if item is None:
         abort(404, description=f"Could not find item with Id of '{id}'.")
 
@@ -61,7 +61,7 @@ def edit_item(id):
 def edit_item_submit(id):
     form = DownloadItemDetailsForm()
     if form.validate_on_submit():
-        item = repo.get_todo_download_item_by_id(id)
+        item = repo.get_todo_download_item_by_id(current_user.id, id)
         if item is None:
             abort(404, description=f"Could not find item with Id of '{id}'.")
 
@@ -82,7 +82,7 @@ def edit_item_submit(id):
 @todo_blueprint.get('/delete')
 @login_required
 def confirm_delete_all():
-    items = repo.get_todo_download_items()
+    items = repo.get_todo_download_items(current_user.id)
     if len(items) < 1:
         return redirect(url_for('todo.display_todo'))
 
@@ -91,9 +91,9 @@ def confirm_delete_all():
 @todo_blueprint.post('/delete')
 @login_required
 def delete_all():
-    items = repo.get_todo_download_items()
+    items = repo.get_todo_download_items(current_user.id)
     if len(items) > 0:
-        repo.delete_todo_download_items()
+        repo.delete_todo_download_items(current_user.id)
 
     return redirect(url_for('todo.display_todo'))
 
@@ -101,7 +101,7 @@ def delete_all():
 @todo_blueprint.get('/<id>/delete')
 @login_required
 def confirm_delete_item(id):
-    item = repo.get_todo_download_item_by_id(id)
+    item = repo.get_todo_download_item_by_id(current_user.id, id)
     if item is None:
         abort(404, description=f"Could not find item with Id of '{id}'.")
 
@@ -120,7 +120,7 @@ def confirm_delete_item(id):
 def delete_item(id):
     form = DownloadItemDetailsForm(True)
     if form.submit.data:
-        repo.delete_todo_download_item_by_id(id)
+        repo.delete_todo_download_item_by_id(current_user.id, id)
 
         return redirect(url_for('todo.display_todo'))
     else:
@@ -129,7 +129,7 @@ def delete_item(id):
 @todo_blueprint.get('/submit')
 @login_required
 def confirm_submit():
-    items = repo.get_todo_download_items()
+    items = repo.get_todo_download_items(current_user.id)
     if len(items) < 1:
         return redirect(url_for('todo.display_todo'))
 
@@ -138,5 +138,5 @@ def confirm_submit():
 @todo_blueprint.post('/submit')
 @login_required
 def submit():
-    repo.submit_todo_items()
+    repo.submit_todo_items(current_user.id)
     return redirect(url_for('core.root'))

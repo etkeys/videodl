@@ -10,7 +10,7 @@ core_blueprint = Blueprint("core", __name__)
 @core_blueprint.get('/')
 @login_required
 def root():
-    if len(repo.get_todo_download_items()) > 0:
+    if len(repo.get_todo_download_items(current_user.id)) > 0:
         return redirect(url_for('todo.display_todo'))
     return redirect(url_for('downloads.display_downloads'))
 

@@ -41,7 +41,6 @@ class DownloadItem(object):
 
         self.download_set_id = download_set_id
         self.url = url
-
         self.id = kwargs.get('id', str(uuid.uuid4()))
         self.status = kwargs.get('status', DownloadItemStatus.TODO)
         self.title = kwargs.get('title', self.id)
@@ -52,6 +51,9 @@ class DownloadItem(object):
     def __repr__(self):
         return f"DownloadItem('{self.id}', '{self.url}', '{self.title}', audio_only={self.audio_only})"
 
+    def belongs_to_set(self, download_set_id):
+        return self.download_set_id == download_set_id
+
     def get_properties_for_display(self):
         return [
             ('Title', self.title),
@@ -59,6 +61,9 @@ class DownloadItem(object):
             ('URL', self.url),
             ('Status', self.status)
         ]
+
+    def is_copied_from(self, other_id):
+        return self.copied_from_id == other_id
 
     def is_failed(self):
         return self.status == DownloadItemStatus.FAILED
@@ -68,17 +73,25 @@ class DownloadItem(object):
 
 class DownloadSet(object):
     id = None
+    user_id = None
     status = None
     created_datetime = None
     queued_datetime = None
     completed_datetime = None
 
-    def __init__(self, **kwargs):
+    def __init__(self, user_id, **kwargs):
+        if user_id is None:
+            raise ValueError('Value for arugment user_id cannot be None.')
+
         self.id = kwargs.get('id', str(uuid.uuid4()))
+        self.user_id = user_id
         self.status = kwargs.get('status', DownloadSetStatus.TODO)
         self.created_datetime = kwargs.get('created_datetime', datetime.now(timezone.utc))
         self.queued_datetime = kwargs.get('queued_datetime', None)
         self.completed_datetime = kwargs.get('completed_datetime', None)
+
+    def belongs_to_user(self, user_id):
+        return self.user_id == user_id
 
     def get_properties_for_display(self):
         return [
