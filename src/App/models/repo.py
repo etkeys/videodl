@@ -212,7 +212,7 @@ class Repository(object):
 
 class WorkerRepository():
     def get_oldest_queued_download_set(self) -> DownloadSet | None:
-        queued_sets = sorted([i for i in download_sets if i.is_queued()], key=(lambda x: x.created_datetime))
+        queued_sets = sorted([i for i in download_sets if i.is_queued()], key=(lambda x: x.queued_datetime))
         return next((i for i in queued_sets), None)
 
     def get_processing_download_set(self):
