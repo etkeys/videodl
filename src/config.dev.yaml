@@ -1,5 +1,5 @@
 common: &common
-  # ARTIFACTS_DIR: "{{ ROOT_PATH }}/../../artifacts"
+  ARTIFACTS_DIR: "{{ EXE_DIR }}/../artifacts"
   LOGS_DIR: "{{ EXE_DIR }}/../logs"
 
 flask:
@@ -11,9 +11,7 @@ app_config:
   ENVIRONMENT: development
   SECRET_KEY: develop
   SESSION_PROTECTION: strong
-  ARTIFACTS_DIR: "{{ ROOT_PATH }}/../../artifacts"
 
 worker_config:
   <<: *common
   DEFAULT_WAIT_SECONDS: 30
-  ARTIFACTS_DIR: "{{ ROOT_PATH }}/../artifacts"

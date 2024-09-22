@@ -134,7 +134,7 @@ if __name__ == '__main__':
     config = read_yaml_config(config_file=args.config)
     config = config['worker_config']
 
-    config[constants.KEY_ARTIFACTS_DIR] = config[constants.KEY_ARTIFACTS_DIR].replace('{{ ROOT_PATH }}', script_dir)
+    config[constants.KEY_ARTIFACTS_DIR] = config[constants.KEY_ARTIFACTS_DIR].replace('{{ EXE_DIR }}', script_dir)
     config[constants.KEY_LOGS_DIR] = config[constants.KEY_LOGS_DIR].replace('{{ EXE_DIR }}', script_dir)
 
     if not path.isdir(config[constants.KEY_ARTIFACTS_DIR]):
