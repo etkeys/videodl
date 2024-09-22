@@ -68,6 +68,9 @@ class DownloadItem(object):
     def is_failed(self):
         return self.status == DownloadItemStatus.FAILED
 
+    def is_queued(self):
+        return self.status == DownloadItemStatus.QUEUED
+
     def is_todo(self):
         return self.status == DownloadItemStatus.TODO
 

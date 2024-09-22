@@ -2,10 +2,11 @@
 from argparse import ArgumentParser
 from datetime import datetime, timezone, timedelta
 from os import path
+from random import choice
 from time import sleep
 
 from App import read_yaml_config, constants
-from App.models import DownloadSetStatus
+from App.models import DownloadItem, DownloadItemStatus, DownloadSetStatus
 from App.models.repo import worker_repo as repo
 
 
@@ -20,7 +21,8 @@ parser.add_argument('-c', '--config',
                     help=f"Path to the config file to load. Paths are relative to run.py. (default: {constants.DEFAULT_CONFIG_FILE})")
 
 def main(config):
-    timeout = config[constants.KEY_DEFAULT_WAIT_SECONDS]
+    default_timeout = config[constants.KEY_DEFAULT_WAIT_SECONDS]
+    rate_limit_timeouts = range(35, 61)
     print("Entering main loop.")
     while True:
         print('Starting work.')
@@ -33,15 +35,37 @@ def main(config):
 
             if ds is None:
                 print ('No download sets currently in "Queued".')
+                timeout = default_timeout
             else:
                 print(f"Picking download set '{ds.id}' from queue.")
                 repo.update_download_set_status(ds, DownloadSetStatus.PROCESSING)
 
         if not ds is None:
-            print(f"Processing download set for user '{ds.user_id}'.")
+            print(f"Processing download set for user '{ds.id}'.")
+            di = repo.get_oldest_queued_download_item(ds.id)
+
+            if di is None:
+                print(f"No items for download set '{ds.id}' in queue. Setting to \"Complete\".")
+                repo.update_download_set_status(ds, DownloadSetStatus.COMPLETED)
+                timeout = default_timeout
+            else:
+                file = do_download(di)
+                do_finalize(di, file)
+                timeout = choice(rate_limit_timeouts)
 
         print(f"Sleeping for {timeout} seconds. Wake up at: {datetime.now(timezone.utc) + timedelta(seconds=timeout)}.")
         sleep(timeout)
+
+def do_download(item: DownloadItem):
+    print(f"Downloading item '{item.id}'.")
+    repo.update_download_item_status(item, DownloadItemStatus.DOWNLOADING)
+
+    
+
+    pass
+
+def do_finalize(item: DownloadItem, file):
+    pass
 
 if __name__ == '__main__':
     args = parser.parse_args()

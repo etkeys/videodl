@@ -211,6 +211,12 @@ class Repository(object):
             item.status = DownloadItemStatus.QUEUED
 
 class WorkerRepository():
+    def get_oldest_queued_download_item(self, download_set_id):
+        queued_items = sorted(
+            [i for i in download_items if i.belongs_to_set(download_set_id) and i.is_queued()],
+            key=(lambda x: x.added_datetime))
+        return next((i for i in queued_items), None)
+
     def get_oldest_queued_download_set(self) -> DownloadSet | None:
         queued_sets = sorted([i for i in download_sets if i.is_queued()], key=(lambda x: x.queued_datetime))
         return next((i for i in queued_sets), None)
