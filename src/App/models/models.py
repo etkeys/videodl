@@ -101,6 +101,9 @@ class DownloadSet(object):
             ('Completed', utils.maybe_datetime_to_display_string(self.completed_datetime))
         ]
 
+    def is_processing(self):
+        return self.status == DownloadSetStatus.PROCESSING
+
     def is_completed(self):
         return self.status == DownloadSetStatus.COMPLETED
 

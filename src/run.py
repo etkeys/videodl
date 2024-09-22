@@ -1,9 +1,7 @@
 from argparse import ArgumentParser
 from os import path
 
-from App import create_app
-
-DEFAULT_CONFIG_FILE = 'config.dev.yaml'
+from App import create_app, constants
 
 parser = ArgumentParser(
             prog='Video DL',
@@ -12,8 +10,8 @@ parser = ArgumentParser(
 
 parser.add_argument('-c', '--config',
                     action='store',
-                    default=DEFAULT_CONFIG_FILE,
-                    help=f"Path to the config file to load. Paths are relative to run.py. (default: {DEFAULT_CONFIG_FILE})")
+                    default=constants.DEFAULT_CONFIG_FILE,
+                    help=f"Path to the config file to load. Paths are relative to run.py. (default: {constants.DEFAULT_CONFIG_FILE})")
 
 
 if __name__ == '__main__':
@@ -21,9 +19,9 @@ if __name__ == '__main__':
 
     app = create_app(config_file=args.config)
 
-    app.config['ARTIFACTS_DIR'] = app.config['ARTIFACTS_DIR'].replace('{{ ROOT_PATH }}', app.root_path)
-    if not path.isdir(app.config['ARTIFACTS_DIR']):
-        print(f"Directory '{app.config['ARTIFACTS_DIR']}' does not exist. Exiting.")
+    app.config[constants.KEY_ARTIFACTS_DIR] = app.config[constants.KEY_ARTIFACTS_DIR].replace('{{ ROOT_PATH }}', app.root_path)
+    if not path.isdir(app.config[constants.KEY_ARTIFACTS_DIR]):
+        print(f"Directory '{app.config[constants.KEY_ARTIFACTS_DIR]}' does not exist. Exiting.")
         exit(4)
 
     app.run()

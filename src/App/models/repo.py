@@ -35,7 +35,7 @@ download_sets = [
         DownloadSet(
             user_id='6fb66c6b-9592-48da-affa-6fa887f241a6',
             id=str(uuid.uuid4()),
-            status=DownloadSetStatus.PROCESSING,
+            status=DownloadSetStatus.QUEUED,
             created_datetime=_init_datetime - timedelta(days=2),
             queued_datetime=_init_datetime - timedelta(days=1, hours=16)
         ),
@@ -210,7 +210,19 @@ class Repository(object):
         for item in self.get_todo_download_items(user_id):
             item.status = DownloadItemStatus.QUEUED
 
+class WorkerRepository():
+    def get_oldest_queued_download_set(self):
+        pass
+
+    def get_processing_download_set(self):
+        return next((i for i in download_sets if i.is_processing()), None)
+
+
+
 repo = Repository()
+
+worker_repo = WorkerRepository()
+
 
 @login_manager.user_loader
 def load_user(user_id):
