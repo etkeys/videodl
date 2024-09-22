@@ -163,3 +163,5 @@ cython_debug/
 
 # Include downloads folder that contains actual source files
 !src/App/templates/downloads/
+
+artifacts/

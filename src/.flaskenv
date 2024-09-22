@@ -1,3 +1,0 @@
-FLASK_APP=Video Downloader
-FLASK_DEBUG=1
-FLASK_ENV=development

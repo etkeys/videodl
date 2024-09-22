@@ -1,0 +1,12 @@
+common: &common
+  ARTIFACTS_DIR: "{{ ROOT_PATH }}/../../artifacts"
+
+flask:
+  name: Video Downloader
+  debug: true
+
+app_config:
+  <<: *common
+  ENVIRONMENT: development
+  SECRET_KEY: develop
+  SESSION_PROTECTION: strong
