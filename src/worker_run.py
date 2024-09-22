@@ -1,13 +1,17 @@
 
 from argparse import ArgumentParser
 from datetime import datetime, timezone, timedelta
-from os import path
+from os import makedirs, path
 from random import choice
+import subprocess
+from shutil import copy2
+from tempfile import TemporaryDirectory
 from time import sleep
 
 from App import read_yaml_config, constants
 from App.models import DownloadItem, DownloadItemStatus, DownloadSetStatus
 from App.models.repo import worker_repo as repo
+from App.utils import create_safe_file_name
 
 
 parser = ArgumentParser(
@@ -41,7 +45,7 @@ def main(config):
                 repo.update_download_set_status(ds, DownloadSetStatus.PROCESSING)
 
         if not ds is None:
-            print(f"Processing download set for user '{ds.id}'.")
+            print(f"Processing download set '{ds.id}'.")
             di = repo.get_oldest_queued_download_item(ds.id)
 
             if di is None:
@@ -49,23 +53,62 @@ def main(config):
                 repo.update_download_set_status(ds, DownloadSetStatus.COMPLETED)
                 timeout = default_timeout
             else:
-                file = do_download(di)
-                do_finalize(di, file)
+                do_download(di, config[constants.KEY_ARTIFACTS_DIR], config[constants.KEY_LOGS_DIR] )
                 timeout = choice(rate_limit_timeouts)
 
         print(f"Sleeping for {timeout} seconds. Wake up at: {datetime.now(timezone.utc) + timedelta(seconds=timeout)}.")
         sleep(timeout)
 
-def do_download(item: DownloadItem):
+
+def do_download(item: DownloadItem, artifacts_dir, logs_dir):
     print(f"Downloading item '{item.id}'.")
     repo.update_download_item_status(item, DownloadItemStatus.DOWNLOADING)
 
-    
+    try:
+        with TemporaryDirectory() as temp_dir:
+            file_name = create_safe_file_name(item.title, item.audio_only)
+            download_file = path.join(temp_dir, file_name)
 
-    pass
+            print('Executing download.')
+            ret = subprocess.run(
+                [
+                    'dd',
+                    'if=/dev/urandom',
+                    f"of={download_file}",
+                    "bs=1KB",
+                    "count=1"
+                ],
+                stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE
+            )
 
-def do_finalize(item: DownloadItem, file):
-    pass
+            # TODO write stderr and stdout to log file
+
+            if ret.returncode == 0:
+                print('Download complete. Moving to finalize.')
+                repo.update_download_item_status(item, DownloadItemStatus.FINALIZING)
+            else:
+                print('Download failed.')
+                repo.update_download_item_status(item, DownloadItemStatus.FAILED)
+                return
+
+            ds_art_dir = path.join(artifacts_dir, item.download_set_id)
+            if not path.isdir(ds_art_dir):
+                makedirs(ds_art_dir)
+
+            print('Copying file to artifacts directory.')
+            copy2(download_file, ds_art_dir)
+
+            print('Finalizing complete. Done with item.')
+            repo.update_download_item_status(item, DownloadItemStatus.COMPLETED)
+
+    except Exception as ex:
+        print('Error occured during operation.')
+        print(ex)
+        repo.update_download_set_status(item, DownloadItemStatus.FAILED)
+
+        # TODO write exception to log file
+
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -74,7 +117,9 @@ if __name__ == '__main__':
 
     config = read_yaml_config(config_file=args.config)
     config = config['worker_config']
+
     config[constants.KEY_ARTIFACTS_DIR] = config[constants.KEY_ARTIFACTS_DIR].replace('{{ ROOT_PATH }}', script_dir)
+    config[constants.KEY_LOGS_DIR] = config[constants.KEY_LOGS_DIR].replace('{{ EXE_DIR }}', script_dir)
 
     if not path.isdir(config[constants.KEY_ARTIFACTS_DIR]):
         print(f"Directory '{config[constants.KEY_ARTIFACTS_DIR]}' does not exist. Exiting.")

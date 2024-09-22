@@ -224,8 +224,11 @@ class WorkerRepository():
     def get_processing_download_set(self):
         return next((i for i in download_sets if i.is_processing()), None)
 
-    def update_download_set_status(self, ds: DownloadSet, status: DownloadSetStatus):
-        ds.status = status
+    def update_download_item_status(self, di: DownloadItem, new_status: DownloadItemStatus):
+        di.status = new_status
+
+    def update_download_set_status(self, ds: DownloadSet, new_status: DownloadSetStatus):
+        ds.status = new_status
 
 
 

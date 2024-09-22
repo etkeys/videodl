@@ -1,18 +1,19 @@
-# common: &common
-#   ARTIFACTS_DIR: "{{ ROOT_PATH }}/../../artifacts"
+common: &common
+  # ARTIFACTS_DIR: "{{ ROOT_PATH }}/../../artifacts"
+  LOGS_DIR: "{{ EXE_DIR }}/../logs"
 
 flask:
   name: Video Downloader
   debug: true
 
 app_config:
-  # <<: *common
+  <<: *common
   ENVIRONMENT: development
   SECRET_KEY: develop
   SESSION_PROTECTION: strong
   ARTIFACTS_DIR: "{{ ROOT_PATH }}/../../artifacts"
 
 worker_config:
-  # <<: *common
+  <<: *common
   DEFAULT_WAIT_SECONDS: 30
   ARTIFACTS_DIR: "{{ ROOT_PATH }}/../artifacts"
