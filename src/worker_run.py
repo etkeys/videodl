@@ -5,6 +5,7 @@ from os import path
 from time import sleep
 
 from App import read_yaml_config, constants
+from App.models import DownloadSetStatus
 from App.models.repo import worker_repo as repo
 
 
@@ -28,10 +29,16 @@ def main(config):
 
         if ds is None:
             print('No download sets currently in "Processing".')
+            ds = repo.get_oldest_queued_download_set()
+
+            if ds is None:
+                print ('No download sets currently in "Queued".')
+            else:
+                print(f"Picking download set '{ds.id}' from queue.")
+                repo.update_download_set_status(ds, DownloadSetStatus.PROCESSING)
 
         if not ds is None:
             print(f"Processing download set for user '{ds.user_id}'.")
-
 
         print(f"Sleeping for {timeout} seconds. Wake up at: {datetime.now(timezone.utc) + timedelta(seconds=timeout)}.")
         sleep(timeout)

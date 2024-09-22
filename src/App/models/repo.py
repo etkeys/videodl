@@ -211,11 +211,15 @@ class Repository(object):
             item.status = DownloadItemStatus.QUEUED
 
 class WorkerRepository():
-    def get_oldest_queued_download_set(self):
-        pass
+    def get_oldest_queued_download_set(self) -> DownloadSet | None:
+        queued_sets = sorted([i for i in download_sets if i.is_queued()], key=(lambda x: x.created_datetime))
+        return next((i for i in queued_sets), None)
 
     def get_processing_download_set(self):
         return next((i for i in download_sets if i.is_processing()), None)
+
+    def update_download_set_status(self, ds: DownloadSet, status: DownloadSetStatus):
+        ds.status = status
 
 
 
