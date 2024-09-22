@@ -4,12 +4,12 @@ from datetime import datetime, timezone, timedelta
 from os import makedirs, path
 from random import choice
 import subprocess
-from shutil import copy2
+from shutil import copy2, make_archive
 from tempfile import TemporaryDirectory
 from time import sleep
 
 from App import read_yaml_config, constants
-from App.models import DownloadItem, DownloadItemStatus, DownloadSetStatus
+from App.models import DownloadItem, DownloadItemStatus, DownloadSet, DownloadSetStatus
 from App.models.repo import worker_repo as repo
 from App.utils import create_safe_file_name
 
@@ -49,8 +49,8 @@ def main(config):
             di = repo.get_oldest_queued_download_item(ds.id)
 
             if di is None:
-                print(f"No items for download set '{ds.id}' in queue. Setting to \"Complete\".")
-                repo.update_download_set_status(ds, DownloadSetStatus.COMPLETED)
+                print(f"No items for download set '{ds.id}' left in queue.")
+                pack_up_download_items(ds, config[constants.KEY_ARTIFACTS_DIR], config[constants.KEY_LOGS_DIR])
                 timeout = default_timeout
             else:
                 do_download(di, config[constants.KEY_ARTIFACTS_DIR], config[constants.KEY_LOGS_DIR] )
@@ -108,6 +108,22 @@ def do_download(item: DownloadItem, artifacts_dir, logs_dir):
         repo.update_download_set_status(item, DownloadItemStatus.FAILED)
 
         # TODO write exception to log file
+
+def pack_up_download_items(ds: DownloadSet, artifacts_dir, logs_dir):
+    print(f"Packing up download set '{ds.id}'.")
+    ds_art_dir = path.join(artifacts_dir, ds.id)
+    try:
+        archive = make_archive(ds_art_dir, 'zip', ds_art_dir)
+        print(f"Download set completed. Archive created: '{archive}'")
+
+        repo.update_download_set_status(ds, DownloadSetStatus.COMPLETED, archive_path=archive)
+
+    except Exception as ex:
+        print(f"Error during packing.")
+        print(ex)
+        repo.update_download_set_status(ds, DownloadSetStatus.PACKING_FAILED)
+
+        # TODO write error to log file
 
 
 if __name__ == '__main__':

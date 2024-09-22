@@ -61,21 +61,21 @@ download_items = [
         url='https://bar.com/1',
         title='Download set 2 #1',
         added_datetime=_init_datetime - timedelta(days=1, hours=23, minutes=30),
-        status=DownloadItemStatus.COMPLETED
+        status=DownloadItemStatus.QUEUED
     ),
     DownloadItem(
         download_set_id=download_sets[1].id,
         url='https://bar.com/2',
         title='Download set 2 #2',
         added_datetime=_init_datetime - timedelta(days=1, hours=20, minutes=43),
-        status=DownloadItemStatus.FAILED
+        status=DownloadItemStatus.QUEUED
     ),
     DownloadItem(
         download_set_id=download_sets[1].id,
         url='https://bar.com/3',
         title='Download set 2 #3',
         added_datetime=_init_datetime - timedelta(days=1, hours=20, minutes=16),
-        status=DownloadItemStatus.DOWNLOADING
+        status=DownloadItemStatus.QUEUED
     ),
     DownloadItem(
         download_set_id=download_sets[1].id,
@@ -227,9 +227,11 @@ class WorkerRepository():
     def update_download_item_status(self, di: DownloadItem, new_status: DownloadItemStatus):
         di.status = new_status
 
-    def update_download_set_status(self, ds: DownloadSet, new_status: DownloadSetStatus):
+    def update_download_set_status(self, ds: DownloadSet, new_status: DownloadSetStatus, **kwargs):
         ds.status = new_status
-
+        if ds.is_completed():
+            ds.completed_datetime = datetime.now(timezone.utc)
+            ds.archive_path = kwargs['archive_path']
 
 
 repo = Repository()

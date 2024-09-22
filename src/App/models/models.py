@@ -81,6 +81,7 @@ class DownloadSet(object):
     created_datetime = None
     queued_datetime = None
     completed_datetime = None
+    archive_path = None
 
     def __init__(self, user_id, **kwargs):
         if user_id is None:
@@ -92,6 +93,7 @@ class DownloadSet(object):
         self.created_datetime = kwargs.get('created_datetime', datetime.now(timezone.utc))
         self.queued_datetime = kwargs.get('queued_datetime', None)
         self.completed_datetime = kwargs.get('completed_datetime', None)
+        self.archive_path = kwargs.get('archive_path', None)
 
     def belongs_to_user(self, user_id):
         return self.user_id == user_id
@@ -132,6 +134,7 @@ class DownloadSetStatus(enum.Enum):
     QUEUED = 1
     PROCESSING = 2
     COMPLETED = 3
+    PACKING_FAILED = 4
 
     def __str__(self):
         return self.name
