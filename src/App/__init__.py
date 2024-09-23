@@ -5,9 +5,9 @@ from flask_login import LoginManager
 
 bcrypt = Bcrypt()
 login_manager = LoginManager()
-login_manager.login_message = 'You must authenticate to access this page.'
-login_manager.login_message_category = 'warning'
-login_manager.login_view = 'core.authenticate'
+login_manager.login_message = "You must authenticate to access this page."
+login_manager.login_message_category = "warning"
+login_manager.login_view = "core.authenticate"
 
 
 def create_app(config_file):
@@ -15,10 +15,10 @@ def create_app(config_file):
 
     config = read_yaml_config(config_file)
 
-    app.debug = config['flask']['debug']
-    app.name = config['flask']['name']
+    app.debug = config["flask"]["debug"]
+    app.name = config["flask"]["name"]
 
-    for key, val in config['app_config'].items():
+    for key, val in config["app_config"].items():
         if key.isupper():
             app.config[key] = val
 
@@ -27,7 +27,9 @@ def create_app(config_file):
 
     from App import utils
 
-    app.jinja_env.filters['datetime_to_display'] = utils.maybe_datetime_to_display_string
+    app.jinja_env.filters["datetime_to_display"] = (
+        utils.maybe_datetime_to_display_string
+    )
 
     from App.routes import core_blueprint, downloads_blueprint, todo_blueprint
 
@@ -36,6 +38,7 @@ def create_app(config_file):
     app.register_blueprint(todo_blueprint)
 
     return app
+
 
 def read_yaml_config(config_file):
     with open(config_file) as f:
