@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     app = create_app(config_file=args.config)
 
-    app.config[constants.KEY_ARTIFACTS_DIR] = app.config[constants.KEY_ARTIFACTS_DIR].replace('{{ EXE_DIR }}', app.root_path)
+    app.config[constants.KEY_ARTIFACTS_DIR] = app.config[constants.KEY_ARTIFACTS_DIR].replace('{{ EXE_DIR }}', script_dir)
     if not path.isdir(app.config[constants.KEY_ARTIFACTS_DIR]):
         print(f"Directory '{app.config[constants.KEY_ARTIFACTS_DIR]}' does not exist. Exiting.")
         exit(4)
