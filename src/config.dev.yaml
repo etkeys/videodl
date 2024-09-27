@@ -3,11 +3,12 @@ common: &common
   LOGS_DIR: "{{ EXE_DIR }}/../logs"
   SQLALCHEMY_DATABASE_URI: "sqlite:///{{ EXE_DIR }}/../site.db"
 
-flask:
-  name: Video Downloader
-  debug: true
+flask: &flask
+  flask_name: Video Downloader
+  flask_debug: true
 
 app_config:
+  <<: *flask
   <<: *common
   ENVIRONMENT: development
   SECRET_KEY: develop

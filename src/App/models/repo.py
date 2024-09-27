@@ -3,6 +3,7 @@ from sqlalchemy.orm import aliased, joinedload
 from .models import *
 
 from App import db, login_manager
+from App.utils import datetime_now
 from App.utils.Exceptions import NotFoundError
 
 
@@ -200,39 +201,46 @@ class Repository(object):
 
 
 class WorkerRepository:
-    def get_oldest_queued_download_item(self, download_set_id):
-        queued_items = sorted(
-            [
-                i
-                for i in download_items
-                if i.belongs_to_set(download_set_id) and i.is_queued()
-            ],
-            key=(lambda x: x.added_datetime),
+    def get_oldest_queued_download_item(self, download_set_id: str):
+        return (
+            DownloadItem.query.filter_by(
+                download_set_id=download_set_id, status=DownloadItemStatus.QUEUED
+            )
+            .order_by(DownloadItem.added_datetime)
+            .first()
         )
-        return next((i for i in queued_items), None)
 
-    def get_oldest_queued_download_set(self) -> DownloadSet | None:
-        queued_sets = sorted(
-            [i for i in download_sets if i.is_queued()],
-            key=(lambda x: x.queued_datetime),
+    def get_oldest_queued_download_set(self):
+        return (
+            DownloadSet.query.filter_by(status=DownloadSetStatus.QUEUED)
+            .order_by(DownloadSet.queued_datetime)
+            .first()
         )
-        return next((i for i in queued_sets), None)
 
     def get_processing_download_set(self):
-        return next((i for i in download_sets if i.is_processing()), None)
+        return (
+            DownloadSet.query.filter_by(status=DownloadSetStatus.PROCESSING)
+            .order_by(DownloadSet.queued_datetime)
+            .first()
+        )
 
     def update_download_item_status(
         self, di: DownloadItem, new_status: DownloadItemStatus
     ):
         di.status = new_status
+        db.session.commit()
 
     def update_download_set_status(
-        self, ds: DownloadSet, new_status: DownloadSetStatus, **kwargs
+        self, ds: DownloadSet, new_status: DownloadSetStatus, archive_path: str = None
     ):
         ds.status = new_status
         if ds.is_completed():
-            ds.completed_datetime = datetime.now(timezone.utc)
-            ds.archive_path = kwargs["archive_path"]
+            ds.completed_datetime = datetime_now()
+            if archive_path is None:
+                raise ValueError("Archive path expected, but got None.")
+            ds.archive_path = archive_path
+
+        db.session.commit()
 
 
 repo = Repository()

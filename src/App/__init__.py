@@ -12,15 +12,17 @@ login_manager.login_message_category = "warning"
 login_manager.login_view = "core.authenticate"
 
 
-def create_app(config_file: dict, exe_dir: str):
+def create_app(config_file: dict, config_section: str, exe_dir: str):
     app = Flask(__name__)
 
-    config = read_yaml_config(config_file)
+    config = read_yaml_config(config_file)[config_section]
 
-    app.debug = config["flask"]["debug"]
-    app.name = config["flask"]["name"]
+    if "flask_debug" in config:
+        app.debug = config["flask_debug"]
+    if "flask_name" in config:
+        app.name = config["flask_name"]
 
-    for key, val in config["app_config"].items():
+    for key, val in config.items():
         if key.isupper():
             if isinstance(val, str) and "{{ EXE_DIR }}" in val:
                 app.config[key] = val.replace("{{ EXE_DIR }}", exe_dir)

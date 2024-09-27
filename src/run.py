@@ -23,7 +23,7 @@ if __name__ == "__main__":
 
     script_dir = path.dirname(path.abspath(__file__))
 
-    app = create_app(config_file=args.config, exe_dir=script_dir)
+    app = create_app(args.config, "app_config", script_dir)
 
     if not path.isdir(app.config[constants.KEY_ARTIFACTS_DIR]):
         print(
