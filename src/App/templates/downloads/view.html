@@ -16,11 +16,13 @@
                 {% endfor %}
             </table>
             <h3>Items in Set:</h3>
-            <div class="w3-section">
-                <form method="POST" action="{{ url_for('downloads.add_all_failed_items_to_todo', download_set_id=download_set.id) }}" class="w3-container w3-right">
-                    <input type="submit" class="input-button w3-btn w3-grey w3-round" value="Add Failed to To Do"/>
-                </form>
-            </div>
+            {% if download_set.is_terminated() and (download_set.id | has_failed_items) %}
+                <div class="w3-section">
+                    <form method="POST" action="{{ url_for('downloads.add_all_failed_items_to_todo', download_set_id=download_set.id) }}" class="w3-container w3-right">
+                        <input type="submit" class="input-button w3-btn w3-grey w3-round" value="Add Failed to To Do"/>
+                    </form>
+                </div>
+            {% endif %}
             <table class="w3-table w3-bordered">
                 <tr>
                     <th>Number</th>

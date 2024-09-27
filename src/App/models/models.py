@@ -86,11 +86,17 @@ class DownloadSet(db.Model):
     def is_completed(self):
         return self.status == DownloadSetStatus.COMPLETED
 
+    def is_packing_failed(self):
+        return self.status == DownloadSetStatus.PACKING_FAILED
+
     def is_processing(self):
         return self.status == DownloadSetStatus.PROCESSING
 
     def is_queued(self):
         return self.status == DownloadSetStatus.QUEUED
+
+    def is_terminated(self):
+        return self.is_completed() or self.is_packing_failed()
 
     def is_todo(self):
         return self.status == DownloadSetStatus.TODO

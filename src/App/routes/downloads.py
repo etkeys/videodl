@@ -85,6 +85,13 @@ def count_items_in_download_set(download_set_id: str):
     return repo.count_items_in_download_set(current_user.id, download_set_id)
 
 
+@downloads_blueprint.app_template_filter("has_failed_items")
+def download_set_has_failed_items(download_set_id: str):
+    return 0 != repo.count_items_in_download_set_failed(
+        current_user.id, download_set_id
+    )
+
+
 @downloads_blueprint.app_template_filter("is_item_copied_to_todo")
 def is_item_copied_to_todo(item_id: str):
     return repo.is_item_copied_to_todo(current_user.id, item_id)
