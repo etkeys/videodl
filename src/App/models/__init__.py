@@ -1,2 +1,8 @@
-from .models import DownloadItem, DownloadItemStatus, DownloadSet, DownloadSetStatus
+from .models import (
+    User,
+    DownloadItem,
+    DownloadItemStatus,
+    DownloadSet,
+    DownloadSetStatus,
+)
 from .repo import repo

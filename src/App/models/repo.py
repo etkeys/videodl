@@ -1,246 +1,202 @@
+from sqlalchemy.orm import aliased, joinedload
+
 from .models import *
 
-from App import bcrypt, login_manager
-from App.utils.Exceptions import UnauthorizedError
-
-
-import uuid
-from datetime import datetime, timezone, timedelta
-
-_init_datetime = datetime.now(timezone.utc)
-users = [
-    User(
-        email="alice@example.com",
-        name="Alice",
-        access_token=bcrypt.generate_password_hash(
-            "7a3d99b983ca418b85a69c7c56778cd5"
-        ).decode("utf-8"),
-        is_admin=True,
-        id="d6c8cbb6-9ab6-4f36-b933-9b6ee8a471b8",
-    ),
-    User(
-        email="bob@example.com",
-        name="Bob",
-        access_token=bcrypt.generate_password_hash(
-            "7b330012fd834268945a90717e7a06d0"
-        ).decode("utf-8"),
-        id="6fb66c6b-9592-48da-affa-6fa887f241a6",
-    ),
-]
-download_sets = [
-    DownloadSet(
-        user_id="d6c8cbb6-9ab6-4f36-b933-9b6ee8a471b8",
-        id=str(uuid.uuid4()),
-        status=DownloadSetStatus.COMPLETED,
-        created_datetime=_init_datetime - timedelta(days=3),
-        queued_datetime=_init_datetime - timedelta(days=2, hours=23),
-        completed_datetime=_init_datetime - timedelta(days=2, hours=21),
-    ),
-    DownloadSet(
-        user_id="6fb66c6b-9592-48da-affa-6fa887f241a6",
-        id=str(uuid.uuid4()),
-        status=DownloadSetStatus.QUEUED,
-        created_datetime=_init_datetime - timedelta(days=2),
-        queued_datetime=_init_datetime - timedelta(days=1, hours=16),
-    ),
-    DownloadSet(user_id="d6c8cbb6-9ab6-4f36-b933-9b6ee8a471b8"),
-]
-download_items = [
-    DownloadItem(
-        download_set_id=download_sets[0].id,
-        url="https://foo.com/1",
-        title="Download set 1 #1",
-        added_datetime=_init_datetime - timedelta(days=2, hours=23, minutes=30),
-        status=DownloadItemStatus.FAILED,
-    ),
-    DownloadItem(
-        download_set_id=download_sets[0].id,
-        url="https://foo.com/2",
-        title="Download set 1 #2",
-        added_datetime=_init_datetime - timedelta(days=2, hours=23, minutes=23),
-        status=DownloadItemStatus.FAILED,
-    ),
-    DownloadItem(
-        download_set_id=download_sets[1].id,
-        url="https://bar.com/1",
-        title="Download set 2 #1",
-        added_datetime=_init_datetime - timedelta(days=1, hours=23, minutes=30),
-        status=DownloadItemStatus.QUEUED,
-    ),
-    DownloadItem(
-        download_set_id=download_sets[1].id,
-        url="https://bar.com/2",
-        title="Download set 2 #2",
-        added_datetime=_init_datetime - timedelta(days=1, hours=20, minutes=43),
-        status=DownloadItemStatus.QUEUED,
-    ),
-    DownloadItem(
-        download_set_id=download_sets[1].id,
-        url="https://bar.com/3",
-        title="Download set 2 #3",
-        added_datetime=_init_datetime - timedelta(days=1, hours=20, minutes=16),
-        status=DownloadItemStatus.QUEUED,
-    ),
-    DownloadItem(
-        download_set_id=download_sets[1].id,
-        url="https://bar.com/4",
-        title="Download set 2 #4",
-        added_datetime=_init_datetime - timedelta(days=1, hours=19, minutes=57),
-        status=DownloadItemStatus.QUEUED,
-    ),
-    DownloadItem(
-        download_set_id=download_sets[2].id,
-        url="https://example.com/1",
-        title="Video #1",
-        audio_only=True,
-    ),
-    DownloadItem(
-        download_set_id=download_sets[2].id,
-        url="https://example.com/2",
-        title="Video #2",
-    ),
-    DownloadItem(
-        download_set_id=download_sets[2].id,
-        url="https://example.com/3",
-        title="Video #3",
-    ),
-]
+from App import db, login_manager
+from App.utils.Exceptions import NotFoundError
 
 
 class Repository(object):
 
-    def add_todo_download_item(self, user_id, item: DownloadItem):
-        if not item.is_todo():
-            raise ValueError('Can only add new item if it is in "TODO" status.')
-        ds = self.get_todo_download_set(user_id)
-        if not item.belongs_to_set(ds.id):
-            raise ValueError(
-                "Cannot add item because it does not belong to a Download Set that is in TODO."
+    def add_download_item(
+        self,
+        user_id: str,
+        title: str,
+        audio_only: bool,
+        url: str,
+        copy_from_id: str | None = None,
+    ):
+        item = (
+            DownloadItem.query.join(DownloadSet)
+            .where(
+                DownloadSet.user_id == user_id,
+                DownloadItem.url == url,
+                DownloadItem.status == DownloadItemStatus.TODO,
             )
-        if any(i.id == item.id for i in download_items):
-            raise ValueError(f"Item already exists")
-
-        download_items.append(item)
-
-    def copy_download_item_to_todo(self, user_id, item: DownloadItem):
-        if self.get_download_set_by_id(user_id, item.download_set_id) is None:
-            raise UnauthorizedError("Could not find originating Download Set for user.")
-
-        if any(
-            i.is_copied_from(item.id) for i in self.get_todo_download_items(user_id)
-        ):
-            return
-
-        new_item = DownloadItem(
-            download_set_id=repo.get_todo_download_set(user_id).id,
-            url=item.url,
-            title=item.title,
-            audio_only=item.audio_only,
-            copied_from_id=item.id,
+            .first()
         )
-        download_items.append(new_item)
 
-    def count_items_in_download_set(self, user_id, download_set_id):
-        return len(self.get_download_items(user_id, download_set_id))
+        if not item is None:
+            raise ValueError(f"Item with url '{url}' already in To Do.")
+
+        ds = self.get_todo_download_set(user_id)
+
+        item = DownloadItem(
+            title=title, audio_only=audio_only, url=url, download_set_id=ds.id
+        )
+
+        if copy_from_id is not None:
+            item.copied_from_id = copy_from_id
+
+        db.session.add(item)
+        db.session.commit()
+
+    def count_items_in_download_set(self, user_id: str, download_set_id: str):
+        return (
+            DownloadItem.query.join(DownloadSet)
+            .where(DownloadSet.id == download_set_id, DownloadSet.user_id == user_id)
+            .count()
+        )
 
     def delete_todo_download_items(self, user_id):
-        items = self.get_todo_download_items(user_id)
-        for item in items:
-            self.delete_todo_download_item_by_id(user_id, item.id)
+        ds = self.get_todo_download_set(user_id, load_child_items_eagerly=True)
+        count = len(ds.items)
+        for item in ds.items:
+            db.session.delete(item)
+        db.session.commit()
 
-    def delete_todo_download_item_by_id(self, user_id, id):
-        ix = next(((i, x) for i, x in enumerate(download_items) if x.id == id), None)
-        if ix is not None:
-            if any(
-                ix[1].belongs_to_set(ds.id) and ds.belongs_to_user(user_id)
-                for ds in download_sets
-            ):
-                del download_items[ix[0]]
+        return count
 
-    def get_download_set_by_id(self, user_id, id):
-        return next(
-            (i for i in download_sets if i.id == id and i.belongs_to_user(user_id)),
-            None,
+    def delete_todo_download_item_by_id(self, user_id: str, item_id: str):
+        item = (
+            DownloadItem.query.join(DownloadSet)
+            .where(
+                DownloadItem.id == item_id,
+                DownloadItem.status == DownloadItemStatus.TODO,
+                DownloadSet.user_id == user_id,
+            )
+            .first()
+        )
+        if item is not None:
+            db.session.delete(item)
+            db.session.commit()
+            return 1
+        return 0
+
+    def get_download_set_by_id(
+        self, user_id: str, download_set_id: str, load_child_items_eagerly: bool = False
+    ):
+        query = DownloadSet.query.filter_by(user_id=user_id, id=download_set_id)
+        if load_child_items_eagerly:
+            query.options(joinedload(DownloadSet.items))
+        return query.first()
+
+    def get_download_sets(self, user_id: str):
+        return DownloadSet.query.filter_by(user_id=user_id).order_by(
+            DownloadSet.created_datetime.desc()
         )
 
-    def get_download_sets(self, user_id):
-        return [i for i in download_sets if i.belongs_to_user(user_id)]
-
-    def get_download_items(self, user_id, download_set_id):
-        ds = self.get_download_set_by_id(user_id, download_set_id)
-        if not ds is None:
-            return [i for i in download_items if i.belongs_to_set(ds.id)]
-        else:
-            return []
-
-    def get_download_items_failed(self, user_id, download_set_id):
-        ds = self.get_download_set_by_id(user_id, download_set_id)
-        if not ds is None:
-            return [
-                i for i in download_items if i.belongs_to_set(ds.id) and i.is_failed()
-            ]
-        else:
-            return []
-
-    def get_download_item_by_id(self, user_id, item_id):
-        item = next((i for i in download_items if i.id == item_id), None)
-        if item is None:
-            return None
-        if any(
-            item.belongs_to_set(ds.id) and ds.belongs_to_user(user_id)
-            for ds in download_sets
-        ):
-            return item
-        else:
-            return None
-
-    def get_todo_download_set(self, user_id):
-        result = next(
-            (
-                ds
-                for ds in download_sets
-                if ds.belongs_to_user(user_id) and ds.is_todo()
-            ),
-            None,
-        )
-        if result is None:
-            download_sets.append(DownloadSet(user_id=user_id))
-            result = download_sets[-1]
-        return result
-
-    def get_todo_download_items(self, user_id):
-        ds = self.get_todo_download_set(user_id)
-        return [i for i in download_items if i.belongs_to_set(ds.id)]
-
-    def get_todo_download_item_by_id(self, user_id, id):
-        ds = self.get_todo_download_set(user_id)
-        item = next(
-            (
-                i
-                for i in download_items
-                if i.belongs_to_set(ds.id) and i.is_todo() and i.id == id
-            ),
-            None,
-        )
-        return item
-
-    def get_user_by_id(self, id):
-        return next((i for i in users if i.id == id), None)
-
-    def get_user_by_name(self, name):
-        name = name.casefold()
-        return next((i for i in users if i.name.casefold() == name), None)
-
-    def is_item_copied_to_todo(self, user_id, item: DownloadItem):
-        return any(
-            i.is_copied_from(item.id) for i in self.get_todo_download_items(user_id)
+    def get_download_items(self, user_id: str, download_set_id: str):
+        return (
+            DownloadItem.query.join(DownloadSet)
+            .where(DownloadSet.id == download_set_id, DownloadSet.user_id == user_id)
+            .order_by(DownloadItem.added_datetime)
+            .all()
         )
 
-    def submit_todo_items(self, user_id):
-        ds = self.get_todo_download_set(user_id)
+    def get_download_items_failed(self, user_id: str, download_set_id: str):
+        return (
+            DownloadItem.query.join(DownloadSet)
+            .where(
+                DownloadItem.status == DownloadItemStatus.FAILED,
+                DownloadSet.id == download_set_id,
+                DownloadSet.user_id == user_id,
+            )
+            .order_by(DownloadItem.added_datetime)
+            .all()
+        )
+
+    def get_download_item_by_id(self, user_id: str, item_id: str):
+        return (
+            DownloadItem.query.join(DownloadSet)
+            .where(DownloadItem.id == item_id, DownloadSet.user_id == user_id)
+            .first()
+        )
+
+    def get_todo_download_items(self, user_id: str):
+        return (
+            DownloadItem.query.join(DownloadSet)
+            .where(
+                DownloadItem.status == DownloadItemStatus.TODO,
+                DownloadSet.user_id == user_id,
+            )
+            .order_by(DownloadItem.added_datetime)
+            .all()
+        )
+
+    def get_todo_download_item_by_id(self, user_id: str, item_id: str):
+        return (
+            DownloadItem.query.join(DownloadSet)
+            .where(
+                DownloadItem.id == item_id,
+                DownloadItem.status == DownloadItemStatus.TODO,
+                DownloadSet.user_id == user_id,
+            )
+            .first()
+        )
+
+    def get_todo_download_set(
+        self, user_id: str, load_child_items_eagerly: bool = False
+    ):
+        query = DownloadSet.query.filter_by(
+            user_id=user_id, status=DownloadSetStatus.TODO
+        )
+        if load_child_items_eagerly:
+            query.options(joinedload(DownloadSet.items))
+        ds = query.first()
+
+        if ds is None:
+            ds = DownloadSet(user_id=user_id)
+            db.session.add(ds)
+            db.session.commit()
+        return ds
+
+    def get_user_by_id(self, id: str):
+        return User.query.get(id)
+
+    def get_user_by_name(self, name: str):
+        return User.query.filter_by(name=name).first()
+
+    def is_item_copied_to_todo(self, user_id: str, item_id: str):
+        downloadItem2 = aliased(DownloadItem)
+
+        count = (
+            DownloadItem.query.join(DownloadSet)
+            .join(downloadItem2, DownloadItem.id == downloadItem2.copied_from_id)
+            .where(
+                DownloadItem.id == item_id,
+                DownloadSet.user_id == user_id,
+                downloadItem2.status == DownloadItemStatus.TODO,
+            )
+        ).count()
+
+        return count > 0
+
+    def submit_todo_items(self, user_id: str):
+        ds = self.get_todo_download_set(user_id, load_child_items_eagerly=True)
+        if len(ds.items) < 1:
+            return 0
+
         ds.status = DownloadSetStatus.QUEUED
-        for item in self.get_todo_download_items(user_id):
+        for item in ds.items:
             item.status = DownloadItemStatus.QUEUED
+        db.session.commit()
+
+        return len(ds.items) + 1
+
+    def update_item(self, user_id: str, item_id: str, **kwargs):
+        item = self.get_todo_download_item_by_id(user_id, item_id)
+        if item is None:
+            raise NotFoundError("Could not find item in To Do status.")
+
+        if "title" in kwargs:
+            item.title = str(kwargs["title"])
+        if "audio_only" in kwargs:
+            item.audio_only = bool(kwargs["audio_only"])
+        if "url" in kwargs:
+            item.url = str(kwargs["url"])
+
+        db.session.commit()
 
 
 class WorkerRepository:
@@ -286,4 +242,4 @@ worker_repo = WorkerRepository()
 
 @login_manager.user_loader
 def load_user(user_id):
-    return repo.get_user_by_id(user_id)
+    return User.query.get(str(user_id))

@@ -27,7 +27,7 @@
                     <th>Details</th>
                     <th>Actions</th>
                 </tr>
-                {% for item in download_items %}
+                {% for item in download_set.items %}
                     <tr>
                         <td style="vertical-align: middle;">{{ loop.index }}</td>
                         <td style="vertical-align: middle;">
@@ -38,7 +38,7 @@
                                         <td>{{ prop_val }}</td>
                                     </tr>
                                 {% endfor %}
-                                {% if item | is_item_copied_to_todo %}
+                                {% if item.id | is_item_copied_to_todo %}
                                     <tr>
                                         <td class="item-details-label">Copied to To Do</td>
                                         <td>Yes</td>

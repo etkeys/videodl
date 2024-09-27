@@ -1,106 +1,73 @@
-from datetime import datetime, timezone
 import enum
-import uuid
 
 from flask_login import UserMixin
+from sqlalchemy import Boolean, String, TIMESTAMP
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import mapped_column, relationship
+from sqlalchemy.types import Enum as SqlEnum
 
-from App import utils
+from App import db, utils
 
 
-class User(UserMixin):
-    id = None
-    email = None
-    name = None
-    access_token = None
-    is_admin = None
+class DownloadItemStatus(enum.Enum):
+    TODO = 0
+    QUEUED = 1
+    DOWNLOADING = 2
+    FINALIZING = 3
+    COMPLETED = 4
+    FAILED = 5
 
-    def __init__(self, email, name, access_token, is_admin=False, **kwargs):
-        self.id = kwargs.get("id", str(uuid.uuid4()))
-        self.email = email
-        self.name = name
-        self.access_token = access_token
-        self.is_admin = is_admin
+    def __str__(self):
+        return self.name
+
+
+class DownloadSetStatus(enum.Enum):
+    TODO = 0
+    QUEUED = 1
+    PROCESSING = 2
+    COMPLETED = 3
+    PACKING_FAILED = 4
+
+    def __str__(self):
+        return self.name
+
+
+class User(db.Model, UserMixin):
+    __tablename__ = "Users"
+    id = mapped_column(
+        String(36, collation="NOCASE"), primary_key=True, default=utils.new_id
+    )
+    email = mapped_column(String(255, collation="NOCASE"), unique=True, nullable=False)
+    name = mapped_column(String(255, collation="NOCASE"), unique=True, nullable=False)
+    access_token = mapped_column(String(60), nullable=False)
+    is_admin = mapped_column(Boolean(), nullable=False, default=False)
+
+    downloads = relationship("DownloadSet", back_populates="user")
 
     def __repr__(self):
         return f"('{self.name}', '{self.email}')"
 
 
-class DownloadItem(object):
-    id = None
-    status = None
-    title = None
-    audio_only = None
-    url = None
-    added_datetime = None
-    download_set_id = None
-    copied_from_id = None
+class DownloadSet(db.Model):
+    __tablename__ = "DownloadSets"
+    id = mapped_column(
+        String(36, collation="NOCASE"), primary_key=True, default=utils.new_id
+    )
+    user_id = mapped_column(
+        String(36, collation="NOCASE"), ForeignKey("Users.id"), nullable=False
+    )
+    status = mapped_column(
+        SqlEnum(DownloadSetStatus), nullable=False, default=DownloadSetStatus.TODO
+    )
+    created_datetime = mapped_column(
+        TIMESTAMP(), nullable=False, default=utils.datetime_now
+    )
+    queued_datetime = mapped_column(TIMESTAMP())
+    completed_datetime = mapped_column(TIMESTAMP())
+    archive_path = mapped_column(String(255))
 
-    def __init__(self, download_set_id, url, **kwargs):
-        if download_set_id is None or not is_valid_uuid(download_set_id):
-            raise ValueError(
-                f"Value for argument download_set_id is not a valid uuid: {download_set_id}."
-            )
-        if url is None:
-            raise ValueError(f"Value for argument url cannot be None.")
-
-        self.download_set_id = download_set_id
-        self.url = url
-        self.id = kwargs.get("id", str(uuid.uuid4()))
-        self.status = kwargs.get("status", DownloadItemStatus.TODO)
-        self.title = kwargs.get("title", self.id)
-        self.audio_only = kwargs.get("audio_only", False)
-        self.added_datetime = kwargs.get("added_datetime", datetime.now(timezone.utc))
-        self.copied_from_id = kwargs.get("copied_from_id", None)
-
-    def __repr__(self):
-        return f"DownloadItem('{self.id}', '{self.url}', '{self.title}', audio_only={self.audio_only})"
-
-    def belongs_to_set(self, download_set_id):
-        return self.download_set_id == download_set_id
-
-    def get_properties_for_display(self):
-        return [
-            ("Title", self.title),
-            ("Audio Only", "Yes" if self.audio_only else "No"),
-            ("URL", self.url),
-            ("Status", self.status),
-        ]
-
-    def is_copied_from(self, other_id):
-        return self.copied_from_id == other_id
-
-    def is_failed(self):
-        return self.status == DownloadItemStatus.FAILED
-
-    def is_queued(self):
-        return self.status == DownloadItemStatus.QUEUED
-
-    def is_todo(self):
-        return self.status == DownloadItemStatus.TODO
-
-
-class DownloadSet(object):
-    id = None
-    user_id = None
-    status = None
-    created_datetime = None
-    queued_datetime = None
-    completed_datetime = None
-    archive_path = None
-
-    def __init__(self, user_id, **kwargs):
-        if user_id is None:
-            raise ValueError("Value for arugment user_id cannot be None.")
-
-        self.id = kwargs.get("id", str(uuid.uuid4()))
-        self.user_id = user_id
-        self.status = kwargs.get("status", DownloadSetStatus.TODO)
-        self.created_datetime = kwargs.get(
-            "created_datetime", datetime.now(timezone.utc)
-        )
-        self.queued_datetime = kwargs.get("queued_datetime", None)
-        self.completed_datetime = kwargs.get("completed_datetime", None)
-        self.archive_path = kwargs.get("archive_path", None)
+    items = relationship("DownloadItem", back_populates="download_set")
+    user = relationship("User", back_populates="downloads")
 
     def belongs_to_user(self, user_id):
         return self.user_id == user_id
@@ -129,54 +96,55 @@ class DownloadSet(object):
         return self.status == DownloadSetStatus.TODO
 
 
-class DownloadItemStatus(enum.Enum):
-    TODO = 0
-    QUEUED = 1
-    DOWNLOADING = 2
-    FINALIZING = 3
-    COMPLETED = 4
-    FAILED = 5
+class DownloadItem(db.Model):
+    __tablename__ = "DownloadItems"
+    id = mapped_column(
+        String(36, collation="NOCASE"), primary_key=True, default=utils.new_id
+    )
+    status = mapped_column(
+        SqlEnum(DownloadItemStatus), nullable=False, default=DownloadItemStatus.TODO
+    )
+    title = mapped_column(String(255, collation="NOCASE"), nullable=False)
+    audio_only = mapped_column(Boolean(), nullable=False, default=False)
+    url = mapped_column(String(255, collation="NOCASE"), nullable=False)
+    added_datetime = mapped_column(
+        TIMESTAMP(), nullable=False, default=utils.datetime_now
+    )
+    download_set_id = mapped_column(
+        String(36, collation="NOCASE"), ForeignKey("DownloadSets.id"), nullable=False
+    )
+    copied_from_id = mapped_column(
+        String(36, collation="NOCASE"), ForeignKey("DownloadItems.id")
+    )
 
-    def __str__(self):
-        return self.name
+    copied_from = relationship("DownloadItem", back_populates="copied_to")
+    copied_to = relationship(
+        "DownloadItem", back_populates="copied_from", remote_side=[id]
+    )
+    download_set = relationship("DownloadSet", back_populates="items")
 
+    def __repr__(self):
+        return f"DownloadItem('{self.id}', '{self.url}', '{self.title}', audio_only={self.audio_only})"
 
-class DownloadSetStatus(enum.Enum):
-    TODO = 0
-    QUEUED = 1
-    PROCESSING = 2
-    COMPLETED = 3
-    PACKING_FAILED = 4
+    def belongs_to_set(self, download_set_id):
+        return self.download_set_id == download_set_id
 
-    def __str__(self):
-        return self.name
+    def get_properties_for_display(self):
+        return [
+            ("Title", self.title),
+            ("Audio Only", "Yes" if self.audio_only else "No"),
+            ("URL", self.url),
+            ("Status", self.status),
+        ]
 
+    def is_copied_from(self, other_id):
+        return self.copied_from_id == other_id
 
-# Taken from stackoverflow (by Martin Thoma)
-# https://stackoverflow.com/a/33245493
-def is_valid_uuid(uuid_to_test, version=4):
-    """
-    Check if uuid_to_test is a valid UUID.
+    def is_failed(self):
+        return self.status == DownloadItemStatus.FAILED
 
-     Parameters
-    ----------
-    uuid_to_test : str
-    version : {1, 2, 3, 4}
+    def is_queued(self):
+        return self.status == DownloadItemStatus.QUEUED
 
-     Returns
-    -------
-    `True` if uuid_to_test is a valid UUID, otherwise `False`.
-
-     Examples
-    --------
-    >>> is_valid_uuid('c9bf9e57-1685-4c89-bafb-ff5af830be8a')
-    True
-    >>> is_valid_uuid('c9bf9e58')
-    False
-    """
-
-    try:
-        uuid_obj = uuid.UUID(uuid_to_test, version=version)
-    except ValueError:
-        return False
-    return str(uuid_obj) == uuid_to_test
+    def is_todo(self):
+        return self.status == DownloadItemStatus.TODO

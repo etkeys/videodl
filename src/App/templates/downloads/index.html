@@ -18,7 +18,7 @@
                             <table class="item-details">
                                 <tr>
                                     <td class="item-details-label"> Items</td>
-                                    <td>{{ item | count_items_in_ds }}</td>
+                                    <td>{{ item.id | count_items_in_ds }}</td>
                                 </tr>
                                 {% for prop_name, prop_val in item.get_properties_for_display() %}
                                     <tr>

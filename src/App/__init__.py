@@ -2,15 +2,17 @@ import yaml
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
 
 bcrypt = Bcrypt()
+db = SQLAlchemy()
 login_manager = LoginManager()
 login_manager.login_message = "You must authenticate to access this page."
 login_manager.login_message_category = "warning"
 login_manager.login_view = "core.authenticate"
 
 
-def create_app(config_file):
+def create_app(config_file: dict, exe_dir: str):
     app = Flask(__name__)
 
     config = read_yaml_config(config_file)
@@ -20,9 +22,13 @@ def create_app(config_file):
 
     for key, val in config["app_config"].items():
         if key.isupper():
-            app.config[key] = val
+            if isinstance(val, str) and "{{ EXE_DIR }}" in val:
+                app.config[key] = val.replace("{{ EXE_DIR }}", exe_dir)
+            else:
+                app.config[key] = val
 
     bcrypt.init_app(app)
+    db.init_app(app)
     login_manager.init_app(app)
 
     from App import utils

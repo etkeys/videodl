@@ -1,6 +1,7 @@
 common: &common
   ARTIFACTS_DIR: "{{ EXE_DIR }}/../artifacts"
   LOGS_DIR: "{{ EXE_DIR }}/../logs"
+  SQLALCHEMY_DATABASE_URI: "sqlite:///{{ EXE_DIR }}/../site.db"
 
 flask:
   name: Video Downloader

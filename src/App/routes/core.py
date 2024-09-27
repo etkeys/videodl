@@ -29,7 +29,6 @@ def authenticate():
         ):
             login_user(user, remember=False)
             next_page = request.args.get("next")
-            print(f"Going to '{next_page}'")
             return redirect(next_page) if next_page else redirect(url_for("core.root"))
         else:
             flash(

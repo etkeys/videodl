@@ -2,7 +2,7 @@ from flask import abort, Blueprint, flash, redirect, render_template, url_for
 from flask_login import current_user, login_required
 
 from App.forms.todo import DownloadItemDetailsForm
-from App.models import DownloadItem, repo
+from App.models import repo
 
 todo_blueprint = Blueprint("todo", __name__, url_prefix="/todo")
 
@@ -12,24 +12,17 @@ todo_blueprint = Blueprint("todo", __name__, url_prefix="/todo")
 def add_item():
     form = DownloadItemDetailsForm()
     if form.validate_on_submit():
-        # TODO Make safe characters in title
-
-        ds_id = repo.get_todo_download_set(current_user.id).id
-
-        new_item = DownloadItem(
-            download_set_id=ds_id,
-            url=form.url.data,
-            title=form.title.data,
-            audio_only=form.audio_only.data,
-        )
-
         try:
-            repo.add_todo_download_item(current_user.id, new_item)
-        except ValueError as e:
-            abort(400, f"Could not add new item: {repr(e)}.")
-
-        flash(f"Item added successfully.", category="success")
-        return redirect(url_for("todo.display_todo"))
+            repo.add_download_item(
+                current_user.id, form.title.data, form.audio_only.data, form.url.data
+            )
+            flash(f"Item added successfully.", category="success")
+            return redirect(url_for("todo.display_todo"))
+        except Exception as ex:
+            flash(f"Item cannot be added. {str(ex)}", category="error")
+            return render_template(
+                "todo/add_edit_item.html", form=form, title="Add Item"
+            )
     else:
         return render_template("todo/add_edit_item.html", form=form, title="Add Item")
 
@@ -38,7 +31,6 @@ def add_item():
 @login_required
 def display_todo():
     items = repo.get_todo_download_items(current_user.id)
-    items.sort(key=(lambda i: i.added_datetime))
     return render_template("todo/index.html", todo=items)
 
 
@@ -66,13 +58,21 @@ def edit_item_submit(id):
         if item is None:
             abort(404, description=f"Could not find item with Id of '{id}'.")
 
-        item.title = form.title.data
-        item.audio_only = form.audio_only.data
-        item.url = form.url.data
-
-        flash("Item updated successfully.", category="success")
-        return redirect(url_for("todo.display_todo"))
-
+        try:
+            repo.update_item(
+                current_user.id,
+                id,
+                title=form.title.data,
+                audio_only=form.audio_only.data,
+                url=form.url.data,
+            )
+            flash("Item updated successfully.", category="success")
+            return redirect(url_for("todo.display_todo"))
+        except Exception as ex:
+            flash(f"Item cannot be updated. {str(ex)}", category="error")
+            return render_template(
+                "todo/add_edit_item.html", form=form, title="Edit Item"
+            )
     else:
         return render_template("todo/add_edit_item.html", form=form, title="Edit Item")
 
@@ -127,6 +127,7 @@ def delete_item(id):
 @todo_blueprint.get("/submit")
 @login_required
 def confirm_submit():
+    # TODO need to add a count function instead getting all the things
     items = repo.get_todo_download_items(current_user.id)
     if len(items) < 1:
         return redirect(url_for("todo.display_todo"))
