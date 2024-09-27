@@ -27,8 +27,26 @@ parser.add_argument(
     help=f"Path to the config file to load. Paths are relative to run.py. (default: {constants.DEFAULT_CONFIG_FILE})",
 )
 
+parser.add_argument(
+    "--random-fail-downloading",
+    action="store_true",
+    help=f"Occasionally, downloading an item may fail (development only)",
+)
 
-def do_download(item: DownloadItem, artifacts_dir, logs_dir):
+parser.add_argument(
+    "--random-fail-finalizing",
+    action="store_true",
+    help=f"Occasionally, finalizing an item may fail (development only)",
+)
+
+
+def do_download(
+    item: DownloadItem,
+    artifacts_dir,
+    logs_dir,
+    random_fail_download: bool,
+    random_fail_finalize,
+):
     print(f"Downloading item '{item.id}'.")
     repo.update_download_item_status(item, DownloadItemStatus.DOWNLOADING)
 
@@ -45,6 +63,8 @@ def do_download(item: DownloadItem, artifacts_dir, logs_dir):
             )
 
             # TODO write stderr and stdout to log file
+            if random_fail_download and choice([1, 2, 3, 4, 5]) < 3:
+                raise Exception("Random fail event.")
 
             if ret.returncode == 0:
                 print("Download complete. Moving to finalize.")
@@ -61,13 +81,16 @@ def do_download(item: DownloadItem, artifacts_dir, logs_dir):
             print("Copying file to artifacts directory.")
             copy2(download_file, ds_art_dir)
 
+            if random_fail_finalize and choice([1, 2, 3, 4, 5]) < 3:
+                raise Exception("Random fail event.")
+
             print("Finalizing complete. Done with item.")
             repo.update_download_item_status(item, DownloadItemStatus.COMPLETED)
 
     except Exception as ex:
         print("Error occured during operation.")
         print(ex)
-        repo.update_download_set_status(item, DownloadItemStatus.FAILED)
+        repo.update_download_item_status(item, DownloadItemStatus.FAILED)
 
         # TODO write exception to log file
 
@@ -95,6 +118,14 @@ if __name__ == "__main__":
     script_dir = path.dirname(path.abspath(__file__))
 
     app = create_app(args.config, "worker_config", script_dir)
+
+    if not app.debug:
+        args.random_fail_downloading = False
+        args.random_fail_finalizing = False
+
+    print(f"Random fail downloading={args.random_fail_downloading}")
+    print(f"Random fail finalizing={args.random_fail_finalizing}")
+    print(args)
 
     if not path.isdir(app.config[constants.KEY_ARTIFACTS_DIR]):
         print(
@@ -143,6 +174,8 @@ if __name__ == "__main__":
                         di,
                         config[constants.KEY_ARTIFACTS_DIR],
                         config[constants.KEY_LOGS_DIR],
+                        args.random_fail_downloading,
+                        args.random_fail_finalizing,
                     )
                     timeout = choice(rate_limit_timeouts)
 
