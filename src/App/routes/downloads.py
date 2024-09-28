@@ -2,12 +2,27 @@ from flask import abort, Blueprint, flash, redirect, render_template, url_for
 from flask_login import current_user, login_required
 
 from App.models import (
-    DownloadItem,
     DownloadItemStatus,
-    DownloadSet,
     DownloadSetStatus,
     repo,
 )
+
+status_color_map_di = {
+    DownloadItemStatus.TODO: "status-color-todo",
+    DownloadItemStatus.QUEUED: "status-color-todo",
+    DownloadItemStatus.DOWNLOADING: "status-color-processing",
+    DownloadItemStatus.FINALIZING: "status-color-processing",
+    DownloadItemStatus.COMPLETED: "status-color-done",
+    DownloadItemStatus.FAILED: "status-color-failed",
+}
+
+status_color_map_ds = {
+    DownloadSetStatus.TODO: "status-color-todo",
+    DownloadSetStatus.QUEUED: "status-color-todo",
+    DownloadSetStatus.PROCESSING: "status-color-processing",
+    DownloadSetStatus.COMPLETED: "status-color-done",
+    DownloadSetStatus.PACKING_FAILED: "status-color-failed",
+}
 
 downloads_blueprint = Blueprint("downloads", __name__, url_prefix="/downloads")
 
@@ -95,3 +110,13 @@ def download_set_has_failed_items(download_set_id: str):
 @downloads_blueprint.app_template_filter("is_item_copied_to_todo")
 def is_item_copied_to_todo(item_id: str):
     return repo.is_item_copied_to_todo(current_user.id, item_id)
+
+
+@downloads_blueprint.app_template_filter("status_color_di")
+def get_download_item_status_color(status: DownloadItemStatus):
+    return status_color_map_di[status]
+
+
+@downloads_blueprint.app_template_filter("status_color_ds")
+def get_download_set_status_color(status: DownloadSetStatus):
+    return status_color_map_ds[status]

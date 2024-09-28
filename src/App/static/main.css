@@ -72,3 +72,26 @@ ul.action-buttons li {
     margin-bottom: 4px;
 }
 
+.status {
+    font-weight: bold;
+}
+
+/* W3 2019 Jester Red*/
+.status-color-failed {
+    color: #9e1030
+}
+
+/* W3 2019 Eden */
+.status-color-done {
+    color: #264e36
+}
+
+/* W3 2019 Galaxy Blue */
+.status-color-processing {
+    color: #2a4b7c
+}
+
+/* W3 2019 Paloma*/
+.status-color-todo {
+    color: #9f9c99
+}

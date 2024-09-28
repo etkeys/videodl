@@ -74,7 +74,7 @@ class DownloadSet(db.Model):
 
     def get_properties_for_display(self):
         return [
-            ("Status", str(self.status)),
+            ("Status", self.status),
             ("Created", utils.maybe_datetime_to_display_string(self.created_datetime)),
             ("Queued", utils.maybe_datetime_to_display_string(self.queued_datetime)),
             (

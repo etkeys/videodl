@@ -11,7 +11,11 @@
                 {% for prop_name, prop_val in download_set.get_properties_for_display() %}
                     <tr>
                         <td class="item-details-label">{{ prop_name }}</td>
-                        <td>{{ prop_val }}</td>
+                        {% if prop_name == "Status" %}
+                            <td class="status {{ prop_val | status_color_ds }}">{{ prop_val }}</td>
+                        {% else %}
+                            <td>{{ prop_val }}</td>
+                        {% endif %}
                     </tr>
                 {% endfor %}
             </table>
@@ -37,7 +41,11 @@
                                 {% for prop_name, prop_val in item.get_properties_for_display() %}
                                     <tr>
                                         <td class="item-details-label">{{ prop_name }}</td>
-                                        <td>{{ prop_val }}</td>
+                                        {% if prop_name == "Status" %}
+                                            <td class="status {{ prop_val | status_color_di }}">{{ prop_val }}</td>
+                                        {% else %}
+                                            <td>{{ prop_val }}</td>
+                                        {% endif %}
                                     </tr>
                                 {% endfor %}
                                 {% if item.id | is_item_copied_to_todo %}
