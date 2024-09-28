@@ -1,4 +1,4 @@
-from flask import abort, Blueprint, flash, redirect, render_template, url_for
+from flask import abort, Blueprint, flash, redirect, render_template, url_for, send_file
 from flask_login import current_user, login_required
 
 from App.models import (
@@ -6,6 +6,7 @@ from App.models import (
     DownloadSetStatus,
     repo,
 )
+import App.utils as utils
 
 status_color_map_di = {
     DownloadItemStatus.TODO: "status-color-todo",
@@ -86,6 +87,19 @@ def display_downloads():
     return render_template("downloads/index.html", download_sets=sets)
 
 
+@downloads_blueprint.get("/<download_set_id>/download")
+@login_required
+def download_archive(download_set_id: str):
+    ds = repo.get_download_set_by_id(current_user.id, download_set_id)
+    if ds is None:
+        abort(404, "Could not find requested download set.")
+    if not ds.is_completed():
+        abort(422, "Requested download set is not completed.")
+    if not utils.download_archive_exists(ds.archive_path):
+        abort(404, "Could not find requested download set archive.")
+    return send_file(ds.archive_path)
+
+
 @downloads_blueprint.get("/<id>/view")
 @login_required
 def view_download_set(id):
@@ -98,6 +112,13 @@ def view_download_set(id):
 @downloads_blueprint.app_template_filter("count_items_in_ds")
 def count_items_in_download_set(download_set_id: str):
     return repo.count_items_in_download_set(current_user.id, download_set_id)
+
+
+@downloads_blueprint.app_template_filter("has_completed_items")
+def download_set_has_completed_items(download_set_id: str):
+    return 0 != repo.count_items_in_download_set_completed(
+        current_user.id, download_set_id
+    )
 
 
 @downloads_blueprint.app_template_filter("has_failed_items")

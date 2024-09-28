@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from os import path
 from uuid import uuid4, UUID
 
 from App import constants
@@ -39,6 +40,12 @@ def create_safe_file_name(title: str, audio_only: bool) -> str:
     )
 
     return f"{new_title}{ext}"
+
+
+def download_archive_exists(archive_path: str):
+    if archive_path is None:
+        return False
+    return path.isfile(archive_path)
 
 
 def maybe_datetime_to_display_string(d: datetime | None) -> str:

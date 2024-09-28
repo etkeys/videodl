@@ -74,6 +74,17 @@ class Repository(object):
             return 1
         return 0
 
+    def count_items_in_download_set_completed(self, user_id: str, download_set_id: str):
+        return (
+            DownloadItem.query.join(DownloadSet)
+            .where(
+                DownloadSet.user_id == user_id,
+                DownloadSet.id == download_set_id,
+                DownloadItem.status == DownloadItemStatus.COMPLETED,
+            )
+            .count()
+        )
+
     def count_items_in_download_set_failed(self, user_id: str, download_set_id: str):
         return (
             DownloadItem.query.join(DownloadSet)
