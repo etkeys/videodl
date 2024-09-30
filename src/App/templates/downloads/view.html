@@ -1,4 +1,7 @@
 {% set active_nav_item = "downloads" %}
+{% if admin_view %}
+    {% set active_nav_item = "admin" %}
+{% endif %}
 {% set meta_auto_refresh = "60" %}
 {% set title="View Download Set" %}
 {% extends "base.html" %}
@@ -8,7 +11,7 @@
             <p>Details for Download Set created on {{ download_set.created_datetime | datetime_to_display }}.</p>
             <h3>Download Set:</h3>
             <table class="item-details">
-                {% for prop_name, prop_val in download_set.get_properties_for_display() %}
+                {% for prop_name, prop_val in download_set.get_properties_for_display(current_user.is_admin) %}
                     <tr>
                         <td class="item-details-label">{{ prop_name }}</td>
                         {% if prop_name == "Status" %}
@@ -43,7 +46,7 @@
                         <td style="vertical-align: middle;">{{ loop.index }}</td>
                         <td style="vertical-align: middle;">
                             <table class="item-details">
-                                {% for prop_name, prop_val in item.get_properties_for_display() %}
+                                {% for prop_name, prop_val in item.get_properties_for_display(current_user.is_admin) %}
                                     <tr>
                                         <td class="item-details-label">{{ prop_name }}</td>
                                         {% if prop_name == "Status" %}

@@ -32,6 +32,7 @@
                             {% endif %}
                                 class="w3-button">Admin</button>
                         <div class="w3-dropdown-content w3-bar-block w3-card-4">
+                            <a href="{{ url_for('admin.view_users') }}" class="w3-bar-item w3-button">Users</a>
                             <a href="{{ url_for('admin.view_worker_messages') }}" class="w3-bar-item w3-button">Worker Log</a>
                         </div>
                 </div>

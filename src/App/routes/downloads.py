@@ -109,11 +109,6 @@ def view_download_set(id):
     return render_template("downloads/view.html", download_set=ds)
 
 
-@downloads_blueprint.app_template_filter("count_items_in_ds")
-def count_items_in_download_set(download_set_id: str):
-    return repo.count_items_in_download_set(current_user.id, download_set_id)
-
-
 @downloads_blueprint.app_template_filter("has_completed_items")
 def download_set_has_completed_items(download_set_id: str):
     return 0 != repo.count_items_in_download_set_completed(
@@ -141,3 +136,11 @@ def get_download_item_status_color(status: DownloadItemStatus):
 @downloads_blueprint.app_template_filter("status_color_ds")
 def get_download_set_status_color(status: DownloadSetStatus):
     return status_color_map_ds[status]
+
+
+@downloads_blueprint.app_context_processor
+def blueprint_utilities():
+    def count_items_in_download_set(user_id: str, download_set_id: str):
+        return repo.count_items_in_download_set(user_id, download_set_id)
+
+    return dict(count_items_in_ds=count_items_in_download_set)

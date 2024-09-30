@@ -96,6 +96,9 @@ class Repository(object):
             .count()
         )
 
+    def count_download_sets(self, user_id: str):
+        return DownloadSet.query.filter_by(user_id=user_id).count()
+
     def get_download_set_by_id(
         self, user_id: str, download_set_id: str, load_child_items_eagerly: bool = False
     ):
@@ -179,6 +182,12 @@ class Repository(object):
 
     def get_user_by_name(self, name: str):
         return User.query.filter_by(name=name).first()
+
+    def get_users(self, user_id: str):
+        user = self.get_user_by_id(user_id)
+        if not user.is_admin:
+            raise UnauthorizedError("User is not authorized for this data.")
+        return User.query.where(User.id != user_id).order_by(User.name).all()
 
     def get_worker_messages(self, user_id: str):
         user = self.get_user_by_id(user_id)

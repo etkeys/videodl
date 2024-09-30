@@ -102,8 +102,8 @@ class DownloadSet(db.Model):
     def belongs_to_user(self, user_id):
         return self.user_id == user_id
 
-    def get_properties_for_display(self):
-        return [
+    def get_properties_for_display(self, include_admin_props: bool | None = False):
+        ret = [
             ("Status", self.status),
             ("Created", utils.maybe_datetime_to_display_string(self.created_datetime)),
             ("Queued", utils.maybe_datetime_to_display_string(self.queued_datetime)),
@@ -112,6 +112,12 @@ class DownloadSet(db.Model):
                 utils.maybe_datetime_to_display_string(self.completed_datetime),
             ),
         ]
+        if include_admin_props:
+            ret += [
+                ("Id", self.id),
+                ("Archive", "" if self.archive_path is None else self.archive_path),
+            ]
+        return ret
 
     def is_completed(self):
         return self.status == DownloadSetStatus.COMPLETED
@@ -165,13 +171,22 @@ class DownloadItem(db.Model):
     def belongs_to_set(self, download_set_id):
         return self.download_set_id == download_set_id
 
-    def get_properties_for_display(self):
-        return [
+    def get_properties_for_display(self, include_admin_props: bool | None = False):
+        ret = [
             ("Title", self.title),
             ("Audio Only", "Yes" if self.audio_only else "No"),
             ("URL", self.url),
             ("Status", self.status),
         ]
+        if include_admin_props:
+            ret += [
+                ("Id", self.id),
+                (
+                    "Copied From",
+                    "" if self.copied_from_id is None else self.copied_from_id,
+                ),
+            ]
+        return ret
 
     def is_copied_from(self, other_id):
         return self.copied_from_id == other_id

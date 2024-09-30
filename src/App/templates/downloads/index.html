@@ -1,4 +1,7 @@
 {% set active_nav_item = "downloads" %}
+{% if admin_view %}
+    {% set active_nav_item = "admin" %}
+{% endif %}
 {% set title="Downloads" %}
 {% extends "base.html" %}
 {% block content %}
@@ -18,9 +21,9 @@
                             <table class="item-details">
                                 <tr>
                                     <td class="item-details-label"> Items</td>
-                                    <td>{{ item.id | count_items_in_ds }}</td>
+                                    <td>{{ count_items_in_ds(item.user_id, item.id) }}</td>
                                 </tr>
-                                {% for prop_name, prop_val in item.get_properties_for_display() %}
+                                {% for prop_name, prop_val in item.get_properties_for_display(current_user.is_admin) %}
                                     <tr>
                                         <td class="item-details-label">{{ prop_name }}</td>
                                         {% if prop_name == "Status" %}
@@ -35,8 +38,12 @@
                         <td style="vertical-align: middle;">
                             <ul class="action-buttons">
                                 <li>
-                                    {% if item.is_todo() %}
+                                    {% if item.is_todo() and admin_view %}
+                                        <button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('admin.view_download_set', user_id=item.user_id, download_set_id=item.id) }}'">Edit</button>
+                                    {% elif item.is_todo() %}
                                         <button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('todo.display_todo') }}'">Edit</button>
+                                    {% elif admin_view %}
+                                        <button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('admin.view_download_set', user_id=item.user_id, download_set_id=item.id) }}'">View</button>
                                     {% else %}
                                         <button type="button" class="w3-btn w3-grey w3-round" onclick="location.href='{{ url_for('downloads.view_download_set', id=item.id) }}'">View</button>
                                     {% endif %}
