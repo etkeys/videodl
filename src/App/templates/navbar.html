@@ -24,6 +24,18 @@
                 id="active-nav-item"
             {% endif %}
                 href="{{ url_for('todo.display_todo') }}" class="w3-bar-item w3-button">To Do</a>
+            {% if current_user.is_admin %}
+                <div class="w3-dropdown-hover">
+                        <button
+                            {% if active_nav_item == "admin" %}
+                                id="active-nav-item"
+                            {% endif %}
+                                class="w3-button">Admin</button>
+                        <div class="w3-dropdown-content w3-bar-block w3-card-4">
+                            <a href="{{ url_for('admin.view_worker_messages') }}" class="w3-bar-item w3-button">Worker Log</a>
+                        </div>
+                </div>
+            {% endif %}
         {% else %}
         &nbsp;
         {% endif %}

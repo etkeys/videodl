@@ -4,7 +4,7 @@ from .models import *
 
 from App import db, login_manager
 from App.utils import datetime_now
-from App.utils.Exceptions import NotFoundError
+from App.utils.Exceptions import NotFoundError, UnauthorizedError
 
 
 class Repository(object):
@@ -180,6 +180,14 @@ class Repository(object):
     def get_user_by_name(self, name: str):
         return User.query.filter_by(name=name).first()
 
+    def get_worker_messages(self, user_id: str):
+        user = self.get_user_by_id(user_id)
+        if not user.is_admin:
+            raise UnauthorizedError("User is not authorized for this data.")
+        return WorkerMessage.query.order_by(
+            WorkerMessage.recorded_datetime.desc()
+        ).all()
+
     def is_item_copied_to_todo(self, user_id: str, item_id: str):
         downloadItem2 = aliased(DownloadItem)
 
@@ -223,6 +231,11 @@ class Repository(object):
 
 
 class WorkerRepository:
+    def add_worker_message(self, level: LogLevel, message: str):
+        m = WorkerMessage(level=level, message=message)
+        db.session.add(m)
+        db.session.commit()
+
     def get_oldest_queued_download_item(self, download_set_id: str):
         return (
             DownloadItem.query.filter_by(

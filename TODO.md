@@ -1,9 +1,8 @@
 
 MVP:
 - App settings
-- Log worker messages to db and files
 - Worker read from app settings
-- View worker log in db
+- Log messages to item and set files
 - Admin stop worker
 - Admin can view Download Sets and Download Items within download sets of any
   user

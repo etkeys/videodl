@@ -4,5 +4,6 @@ from .models import (
     DownloadItemStatus,
     DownloadSet,
     DownloadSetStatus,
+    LogLevel,
 )
 from .repo import repo

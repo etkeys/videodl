@@ -1,0 +1,27 @@
+{% set active_nav_item = "admin" %}
+{% set meta_auto_refresh = "180" %}
+{% set title="Admin: View Worker Messages" %}
+{% extends "base.html" %}
+{% block content %}
+<div class="w3-row">
+    <div class="w3-twothird">
+        <p>The messages recorded from the worker. Current time is: {{ current_time | datetime_to_display }}.</p>
+        <table class="w3-table w3-bordered">
+            <tr>
+                <th>Id</th>
+                <th style="width:20%">Time</th>
+                <th>Level</th>
+                <th>Message</th>
+            </tr>
+            {% for message in messages %}
+                <tr>
+                    <td>{{ message.id }}</td>
+                    <td>{{ message.recorded_datetime | datetime_to_display }}</td>
+                    <td>{{ message.level }}</td>
+                    <td>{{ message.message }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+</div>
+{% endblock content %}

@@ -6,9 +6,16 @@ import subprocess
 from shutil import copy2, make_archive
 from tempfile import TemporaryDirectory
 from time import sleep
+from traceback import format_exc
 
 from App import constants, create_app
-from App.models import DownloadItem, DownloadItemStatus, DownloadSet, DownloadSetStatus
+from App.models import (
+    DownloadItem,
+    DownloadItemStatus,
+    DownloadSet,
+    DownloadSetStatus,
+    LogLevel,
+)
 from App.models.repo import worker_repo as repo
 from App.utils import create_safe_file_name, datetime_now
 
@@ -40,6 +47,14 @@ parser.add_argument(
 )
 
 
+def log(message: str, level: LogLevel = LogLevel.INFO):
+    label = LogLevel.get_label(level)
+    print(f"{label}: {message}")  # stdout, for journald
+    if level >= LogLevel.INFO:
+        with app.app_context():
+            repo.add_worker_message(level, message)
+
+
 def do_download(
     item: DownloadItem,
     artifacts_dir,
@@ -47,7 +62,7 @@ def do_download(
     random_fail_download: bool,
     random_fail_finalize,
 ):
-    print(f"Downloading item '{item.id}'.")
+    log(f"Downloading item '{item.id}'.")
     repo.update_download_item_status(item, DownloadItemStatus.DOWNLOADING)
 
     try:
@@ -55,7 +70,7 @@ def do_download(
             file_name = create_safe_file_name(item.title, item.audio_only)
             download_file = path.join(temp_dir, file_name)
 
-            print("Executing download.")
+            log("Executing download.", LogLevel.INFOLOW)
             ret = subprocess.run(
                 ["dd", "if=/dev/urandom", f"of={download_file}", "bs=1KB", "count=1"],
                 stderr=subprocess.PIPE,
@@ -67,10 +82,10 @@ def do_download(
                 raise Exception("Random fail event.")
 
             if ret.returncode == 0:
-                print("Download complete. Moving to finalize.")
+                log("Download complete. Moving to finalize.", LogLevel.INFOLOW)
                 repo.update_download_item_status(item, DownloadItemStatus.FINALIZING)
             else:
-                print("Download failed.")
+                log("Download failed.", LogLevel.ERROR)
                 repo.update_download_item_status(item, DownloadItemStatus.FAILED)
                 return
 
@@ -78,38 +93,38 @@ def do_download(
             if not path.isdir(ds_art_dir):
                 makedirs(ds_art_dir)
 
-            print("Copying file to artifacts directory.")
+            log("Copying file to artifacts directory.", LogLevel.INFOLOW)
             copy2(download_file, ds_art_dir)
 
             if random_fail_finalize and choice([1, 2, 3, 4, 5]) < 3:
                 raise Exception("Random fail event.")
 
-            print("Finalizing complete. Done with item.")
+            log("Complete. Done with item.")
             repo.update_download_item_status(item, DownloadItemStatus.COMPLETED)
 
     except Exception as ex:
-        print("Error occured during operation.")
-        print(ex)
+        log(f"Error occured during operation. {ex}")
+        log(format_exc(ex), LogLevel.DEBUG)
         repo.update_download_item_status(item, DownloadItemStatus.FAILED)
 
-        # TODO write exception to log file
+        # TODO write exception to item log file
 
 
 def pack_up_download_items(ds: DownloadSet, artifacts_dir, logs_dir):
-    print(f"Packing up download set '{ds.id}'.")
+    log(f"Packing up download set '{ds.id}'.", LogLevel.INFOLOW)
     ds_art_dir = path.join(artifacts_dir, ds.id)
     try:
         archive = make_archive(ds_art_dir, "zip", ds_art_dir)
-        print(f"Download set completed. Archive created: '{archive}'")
+        log(f"Download set completed. Archive created: '{archive}'")
 
         repo.update_download_set_status(ds, DownloadSetStatus.COMPLETED, archive)
 
     except Exception as ex:
-        print(f"Error during packing.")
-        print(ex)
+        log(f"Error during packing. {ex}", LogLevel.ERROR)
+        log(format_exc(ex))
         repo.update_download_set_status(ds, DownloadSetStatus.PACKING_FAILED)
 
-        # TODO write error to log file
+        # TODO write error to set log file
 
 
 if __name__ == "__main__":
@@ -123,13 +138,10 @@ if __name__ == "__main__":
         args.random_fail_downloading = False
         args.random_fail_finalizing = False
 
-    print(f"Random fail downloading={args.random_fail_downloading}")
-    print(f"Random fail finalizing={args.random_fail_finalizing}")
-    print(args)
-
     if not path.isdir(app.config[constants.KEY_ARTIFACTS_DIR]):
-        print(
-            f"Directory '{app.config[constants.KEY_ARTIFACTS_DIR]}' does not exist. Exiting."
+        log(
+            f"Directory '{app.config[constants.KEY_ARTIFACTS_DIR]}' does not exist. Exiting.",
+            LogLevel.ERROR,
         )
         exit(4)
 
@@ -137,32 +149,36 @@ if __name__ == "__main__":
     default_timeout = config[constants.KEY_DEFAULT_WAIT_SECONDS]
     rate_limit_timeouts = range(35, 61)
 
-    print("Entering main loop.")
+    log("Entering main loop.", LogLevel.INFOLOW)
     while True:
-        print("Starting work.")
+        log("Starting work.")
 
         with app.app_context():
             ds = repo.get_processing_download_set()
 
             if ds is None:
-                print('No download sets currently in "Processing".')
+                log('No download sets currently in "Processing".', LogLevel.INFOLOW)
                 ds = repo.get_oldest_queued_download_set()
 
                 if ds is None:
-                    print('No download sets currently in "Queued".')
+                    log('No download sets currently in "Queued".', LogLevel.INFOLOW)
+                    log("Nothing to do.")
                     timeout = default_timeout
                 else:
-                    print(f"Picking download set '{ds.id}' from queue.")
+                    log(f"Picking download set '{ds.id}' from queue.", LogLevel.INFOLOW)
                     repo.update_download_set_status(ds, DownloadSetStatus.PROCESSING)
 
             if not ds is None:
-                print(f"Processing download set '{ds.id}'.")
+                log(f"Processing download set '{ds.id}'.")
                 di = repo.get_oldest_queued_download_item(ds.id)
 
                 # TODO Reset items in FINALIZING or PROCESSING
 
                 if di is None:
-                    print(f"No items for download set '{ds.id}' left in queue.")
+                    log(
+                        f"No items for download set '{ds.id}' left in queue.",
+                        LogLevel.INFOLOW,
+                    )
                     pack_up_download_items(
                         ds,
                         config[constants.KEY_ARTIFACTS_DIR],
@@ -179,7 +195,7 @@ if __name__ == "__main__":
                     )
                     timeout = choice(rate_limit_timeouts)
 
-        print(
+        log(
             f"Sleeping for {timeout} seconds. Wake up at: {datetime_now() + timedelta(seconds=timeout)}."
         )
         sleep(timeout)

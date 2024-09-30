@@ -1,12 +1,42 @@
 import enum
+from functools import total_ordering
 
 from flask_login import UserMixin
-from sqlalchemy import Boolean, String, TIMESTAMP
+from sqlalchemy import Boolean, Integer, String, TIMESTAMP
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import mapped_column, relationship
 from sqlalchemy.types import Enum as SqlEnum
 
 from App import db, utils
+
+
+@total_ordering
+class LogLevel(enum.Enum):
+    DEBUG = 1
+    INFOLOW = 2
+    INFO = 3
+    WARNING = 4
+    ERROR = 5
+
+    def __lt__(self, other):
+        if self.__class__ is other.__class__:
+            return self.value < other.value
+        raise NotImplementedError
+
+    def __str__(self):
+        return self.name
+
+    @staticmethod
+    def get_label(level):
+        if level == LogLevel.DEBUG:
+            return "[DBG]"
+        if level in [LogLevel.INFO, LogLevel.INFOLOW]:
+            return "[INF]"
+        if level == LogLevel.WARNING:
+            return "[WRN]"
+        if level == LogLevel.ERROR:
+            return "[ERR]"
+        raise IndexError(f"Value for level not acceptable: {level}.")
 
 
 class DownloadItemStatus(enum.Enum):
@@ -154,3 +184,13 @@ class DownloadItem(db.Model):
 
     def is_todo(self):
         return self.status == DownloadItemStatus.TODO
+
+
+class WorkerMessage(db.Model):
+    __tablename__ = "WorkerMessages"
+    id = mapped_column(Integer, primary_key=True, autoincrement=True)
+    recorded_datetime = mapped_column(
+        TIMESTAMP(), nullable=False, unique=True, default=utils.datetime_now
+    )
+    level = mapped_column(SqlEnum(LogLevel), nullable=False)
+    message = mapped_column(String, nullable=False)
