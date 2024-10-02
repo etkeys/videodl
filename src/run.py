@@ -31,4 +31,6 @@ if __name__ == "__main__":
         )
         exit(4)
 
+    constants.a_dir_log = app.config[constants.KEY_LOGS_DIR]
+
     app.run()

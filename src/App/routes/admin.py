@@ -1,8 +1,8 @@
-from flask import abort, Blueprint, render_template
+from flask import abort, Blueprint, render_template, Response
 from flask_login import current_user, login_required
 
 from App.models import repo
-from App.utils import datetime_now
+from App.utils import datetime_now, get_log_file_contents
 from App.utils.Exceptions import UnauthorizedError
 
 admin_blueprint = Blueprint("admin", __name__, url_prefix="/admin")
@@ -18,6 +18,16 @@ def view_download_set(user_id: str, download_set_id: str):
     if ds is None:
         abort(404, f"Could not find download set with Id '{id}'.")
     return render_template("downloads/view.html", download_set=ds, admin_view=True)
+
+
+@admin_blueprint.get("logs/<log_id>")
+@login_required
+def view_log(log_id: str):
+    _abort_403_if_not_admin()
+    content = get_log_file_contents(log_id)
+    if content is None:
+        return Response(status=204)
+    return Response(content, mimetype="text/plain")
 
 
 @admin_blueprint.get("users/<user_id>/downloads")

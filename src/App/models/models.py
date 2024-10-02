@@ -59,6 +59,8 @@ class DownloadSetStatus(enum.Enum):
     PACKING_FAILED = 4
 
     def __str__(self):
+        if self == DownloadSetStatus.PACKING_FAILED:
+            return "PACKING FAILED"
         return self.name
 
 
@@ -196,6 +198,12 @@ class DownloadItem(db.Model):
 
     def is_queued(self):
         return self.status == DownloadItemStatus.QUEUED
+
+    def is_terminated(self):
+        return (
+            self.status == DownloadItemStatus.COMPLETED
+            or self.status == DownloadItemStatus.FAILED
+        )
 
     def is_todo(self):
         return self.status == DownloadItemStatus.TODO

@@ -28,6 +28,30 @@ status_color_map_ds = {
 downloads_blueprint = Blueprint("downloads", __name__, url_prefix="/downloads")
 
 
+@downloads_blueprint.post("/<download_set_id>/add_all_items_to_todo")
+@login_required
+def add_all_items_to_todo(download_set_id: str):
+    ds = repo.get_download_set_by_id(current_user.id, download_set_id)
+    if ds is None:
+        abort(404, f"Could not find Download Set with Id '{download_set_id}'.")
+    if not ds.is_packing_failed():
+        abort(
+            422,
+            f"Can only perform action when status is '{DownloadSetStatus.PACKING_FAILED}'.",
+        )
+
+    try:
+        count = repo.copy_download_set_items_to_todo(current_user.id, download_set_id)
+        if count < 1:
+            flash("No items were copied to To Do.", category="warning")
+        else:
+            flash("Items copied to To Do successfully.", category="success")
+    except Exception as ex:
+        flash(f"Failed to copy items to To Do. {ex}", category="error")
+
+    return redirect(url_for("downloads.view_download_set", id=download_set_id))
+
+
 @downloads_blueprint.post("/<download_set_id>/add_failed_to_todo/<item_id>")
 @login_required
 def add_failed_item_to_todo(download_set_id, item_id):

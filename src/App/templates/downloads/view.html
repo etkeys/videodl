@@ -22,6 +22,13 @@
                     </tr>
                 {% endfor %}
             </table>
+            {% if current_user.is_admin %}
+            <div class="w3-section">
+                <form method="GET" action="{{ url_for('admin.view_log', log_id=download_set.id) }}" class="w3-container">
+                    <input type="submit" class="input-button w3-btn w3-grey w3-round" value="View Log"/>
+                </form>
+            </div>
+            {% endif %}
             <h3>Items in Set:</h3>
             <div class="w3-section">
                     {% if download_set.is_completed () and (download_set.id | has_completed_items) %}
@@ -29,9 +36,13 @@
                         <input type="submit" class="input-button w3-btn w3-grey w3-round" value="Download"/>
                     </form>
                     {% endif %}
-                    {% if download_set.is_terminated() and (download_set.id | has_failed_items) %}
+                    {% if download_set.is_completed() and (download_set.id | has_failed_items) %}
                     <form method="POST" action="{{ url_for('downloads.add_all_failed_items_to_todo', download_set_id=download_set.id) }}" class="w3-container w3-right">
                         <input type="submit" class="input-button w3-btn w3-grey w3-round" value="Add Failed to To Do"/>
+                    </form>
+                    {% elif download_set.is_packing_failed() %}
+                    <form method="POST" action="{{ url_for('downloads.add_all_items_to_todo', download_set_id=download_set.id) }}" class="w3-container w3-right">
+                        <input type="submit" class="input-button w3-btn w3-grey w3-round" value="Add all to To Do"/>
                     </form>
                     {% endif %}
                 </div>
@@ -64,17 +75,24 @@
                                 {% endif %}
                             </table>
                         </td>
-                        {% if download_set.is_completed() and item.is_failed() %}
-                            <td style="vertical-align: middle;">
-                                <ul class="action-buttons">
+                        <td style="vertical-align: middle;">
+                            <ul class="action-buttons">
+                                    {% if download_set.is_completed() and item.is_failed() %}
                                     <li>
                                         <form method="POST" action="{{ url_for('downloads.add_failed_item_to_todo', download_set_id=download_set.id, item_id=item.id) }}" class="w3-container">
                                             <input type="submit" class="input-button w3-btn w3-grey w3-round" value="Add to To Do"/>
                                         </form>
                                     </li>
+                                    {% endif %}
+                                    {% if current_user.is_admin and item.is_terminated() %}
+                                    <li>
+                                        <form method="GET" action="{{ url_for('admin.view_log', log_id=item.id) }}" class="w3-container">
+                                            <input type="submit" class="input-button w3-btn w3-grey w3-round" value="View Log"/>
+                                        </form>
+                                    </li>
+                                    {% endif %}
                                 </ul>
                             </td>
-                        {% endif %}
                     </tr>
                 {% endfor %}
             </table>

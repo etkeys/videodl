@@ -1,4 +1,5 @@
-from sqlalchemy.orm import aliased, joinedload
+from sqlalchemy.sql import or_
+from sqlalchemy.orm import aliased, joinedload, SessionTransaction
 
 from .models import *
 
@@ -16,6 +17,7 @@ class Repository(object):
         audio_only: bool,
         url: str,
         copy_from_id: str | None = None,
+        commit_on_add: bool = True,
     ):
         item = (
             DownloadItem.query.join(DownloadSet)
@@ -40,7 +42,38 @@ class Repository(object):
             item.copied_from_id = copy_from_id
 
         db.session.add(item)
-        db.session.commit()
+
+        if commit_on_add:
+            db.session.commit()
+
+    def copy_download_set_items_to_todo(self, user_id: str, download_set_id: str):
+        downloadItem2 = aliased(DownloadItem)
+
+        items = (
+            DownloadItem.query.join(DownloadSet)
+            .join(
+                downloadItem2,
+                DownloadItem.id == downloadItem2.copied_from_id,
+                isouter=True,
+            )
+            .where(
+                DownloadSet.id == download_set_id,
+                DownloadSet.user_id == user_id,
+                downloadItem2.id == None,
+            )
+            .all()
+        )
+
+        if len(items) < 1:
+            return 0
+
+        for item in items:
+            self.add_download_item(
+                user_id, item.title, item.audio_only, item.url, item.id, False
+            )
+            db.session.commit()
+
+        return len(items)
 
     def count_items_in_download_set(self, user_id: str, download_set_id: str):
         return (
@@ -267,6 +300,16 @@ class WorkerRepository:
             .order_by(DownloadSet.queued_datetime)
             .first()
         )
+
+    def reset_items_in_progress(self, download_set_id: str):
+        DownloadItem.query.where(
+            DownloadItem.download_set_id == download_set_id,
+            or_(
+                DownloadItem.status == DownloadItemStatus.DOWNLOADING,
+                DownloadItem.status == DownloadItemStatus.FINALIZING,
+            ),
+        ).update({"status": DownloadItemStatus.QUEUED})
+        db.session.commit()
 
     def update_download_item_status(
         self, di: DownloadItem, new_status: DownloadItemStatus

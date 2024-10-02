@@ -48,6 +48,14 @@ def download_archive_exists(archive_path: str):
     return path.isfile(archive_path)
 
 
+def get_log_file_contents(log_id: str):
+    log_file = path.join(constants.a_dir_log, f"{log_id}.log")
+    if not path.isfile(log_file):
+        return None
+    with open(log_file, "r") as f:
+        return f.readlines()
+
+
 def maybe_datetime_to_display_string(d: datetime | None) -> str:
     if not d:
         return ""
