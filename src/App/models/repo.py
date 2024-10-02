@@ -210,6 +210,9 @@ class Repository(object):
             db.session.commit()
         return ds
 
+    def get_user_by_auth_id(self, auth_id: str):
+        return User.query.filter_by(auth_id=auth_id).first()
+
     def get_user_by_id(self, id: str):
         return User.query.get(id)
 
@@ -269,6 +272,21 @@ class Repository(object):
         if "url" in kwargs:
             item.url = str(kwargs["url"])
 
+        db.session.commit()
+
+    def update_user(self, user_id: str, **kwargs):
+        user = self.get_user_by_id(user_id)
+        if user is None:
+            raise KeyError(f"Could not find user with id '{user_id}'.")
+
+        if "email" in kwargs:
+            user.email = kwargs["email"]
+        if "name" in kwargs:
+            user.name = kwargs["name"]
+        if "pw_hash" in kwargs:
+            user.pw_hash = kwargs["pw_hash"]
+        if "auth_id" in kwargs:
+            user.auth_id = kwargs["auth_id"]
         db.session.commit()
 
 
@@ -337,4 +355,4 @@ worker_repo = WorkerRepository()
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(str(user_id))
+    return repo.get_user_by_auth_id(str(user_id))

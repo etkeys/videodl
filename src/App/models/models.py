@@ -69,15 +69,21 @@ class User(db.Model, UserMixin):
     id = mapped_column(
         String(36, collation="NOCASE"), primary_key=True, default=utils.new_id
     )
+    auth_id = mapped_column(
+        String(36), unique=True, nullable=False, default=utils.new_id
+    )
     email = mapped_column(String(255, collation="NOCASE"), unique=True, nullable=False)
     name = mapped_column(String(255, collation="NOCASE"), unique=True, nullable=False)
-    access_token = mapped_column(String(60), nullable=False)
+    pw_hash = mapped_column(String(60), nullable=False)
     is_admin = mapped_column(Boolean(), nullable=False, default=False)
 
     downloads = relationship("DownloadSet", back_populates="user")
 
     def __repr__(self):
         return f"('{self.name}', '{self.email}')"
+
+    def get_id(self):
+        return self.auth_id
 
 
 class DownloadSet(db.Model):

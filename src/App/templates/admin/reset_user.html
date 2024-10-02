@@ -1,0 +1,23 @@
+{% set active_nav_item = "admin" %}
+{% set title="Admin: Reset User" %}
+{% extends "base.html" %}
+{% block content %}
+<div class="w3-row">
+    <div class="w3-twothird">
+        <p>{{ user_name }} has been reset! Please sent the following to them at {{ user_email }}.</p>
+        <div class="w3-2019-vanilla-custard">
+            <pre>
+Your account has been reset and you've been logged out of your other sessions.
+Please use the access token below to access your account going forward.
+
+{{ access_token }}
+
+Please treat this access token like a password.
+
+Thank you!
+- Video DL Admin
+            </pre>
+        </div>
+    </div>
+</div>
+{% endblock content %}

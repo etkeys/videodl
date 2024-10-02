@@ -10,12 +10,22 @@
                 <th style="width:15%">Name</th>
                 <th>Email</th>
                 <th>Download Sets</th>
+                <th>Actions</th>
             </tr>
             {% for user in users %}
                 <tr>
-                    <td>{{ user.name }}</td>
-                    <td>{{ user.email }}</td>
-                    <td><a href="{{ url_for('admin.view_user_downloads', user_id=user.id) }}">{{ count_download_sets(user.id) }}</td>
+                    <td style="vertical-align: middle;">{{ user.name }}</td>
+                    <td style="vertical-align: middle;">{{ user.email }}</td>
+                    <td style="vertical-align: middle;"><a href="{{ url_for('admin.view_user_downloads', user_id=user.id) }}">{{ count_download_sets(user.id) }}</td>
+                    <td style="vertical-align: middle;">
+                        <ul class="action-buttons">
+                            <li>
+                                <form method="POST" action="{{ url_for('admin.reset_user', user_id=user.id) }}" class="w3-container">
+                                    <input type="submit" class="input-button w3-btn w3-grey w3-round" value="Reset"/>
+                                </form>
+                            </li>
+                        </ul>
+                    </td>
                 </tr>
             {% endfor %}
         </table>

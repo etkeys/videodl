@@ -37,7 +37,7 @@ if __name__ == "__main__":
                 id="d6c8cbb6-9ab6-4f36-b933-9b6ee8a471b8",
                 email="alice@example.com",
                 name="Alice",
-                access_token=bcrypt.generate_password_hash(
+                pw_hash=bcrypt.generate_password_hash(
                     "7a3d99b983ca418b85a69c7c56778cd5"
                 ).decode("utf-8"),
                 is_admin=True,
@@ -45,7 +45,7 @@ if __name__ == "__main__":
             User(
                 email="bob@example.com",
                 name="Bob",
-                access_token=bcrypt.generate_password_hash(
+                pw_hash=bcrypt.generate_password_hash(
                     "7b330012fd834268945a90717e7a06d0"
                 ).decode("utf-8"),
                 id="6fb66c6b-9592-48da-affa-6fa887f241a6",

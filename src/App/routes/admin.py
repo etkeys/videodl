@@ -1,11 +1,38 @@
-from flask import abort, Blueprint, render_template, Response
+from base64 import b64encode
+from flask import abort, Blueprint, flash, redirect, render_template, Response, url_for
 from flask_login import current_user, login_required
 
+from App import bcrypt
 from App.models import repo
-from App.utils import datetime_now, get_log_file_contents
+from App.utils import datetime_now, get_log_file_contents, new_id
 from App.utils.Exceptions import UnauthorizedError
 
 admin_blueprint = Blueprint("admin", __name__, url_prefix="/admin")
+
+
+@admin_blueprint.post("users/<user_id>/reset")
+@login_required
+def reset_user(user_id: str):
+    _abort_403_if_not_admin()
+    user = repo.get_user_by_id(user_id)
+    if user.id == current_user.id:
+        abort(422, "Cannot reset yourself")
+    new_auth_id = new_id()
+    new_pw = new_id()
+    new_pw_hash = bcrypt.generate_password_hash(new_pw).decode("utf-8")
+    new_token = b64encode(f"{new_pw}_{user.name}".encode("utf-8")).decode("utf-8")
+
+    try:
+        repo.update_user(user_id, auth_id=new_auth_id, pw_hash=new_pw_hash)
+        return render_template(
+            "admin/reset_user.html",
+            user_name=user.name,
+            user_email=user.email,
+            access_token=new_token,
+        )
+    except Exception as ex:
+        flash(f"Unable to reset user. {ex}")
+        return redirect(url_for("admin.view_users"))
 
 
 @admin_blueprint.get("users/<user_id>/downloads/<download_set_id>/")

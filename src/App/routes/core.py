@@ -1,3 +1,4 @@
+from base64 import b64decode
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user
 
@@ -23,17 +24,20 @@ def authenticate():
 
     form = AuthenticateForm()
     if form.validate_on_submit():
-        user = repo.get_user_by_name(form.user_name.data)
-        if user and bcrypt.check_password_hash(
-            user.access_token, form.access_token.data
-        ):
-            login_user(user, remember=False)
-            next_page = request.args.get("next")
-            return redirect(next_page) if next_page else redirect(url_for("core.root"))
-        else:
-            flash(
-                "Login unsuccessful. Please check name and access token.",
-                category="error",
-            )
+        credentials = b64decode(form.access_token.data).decode("utf-8").split("_")
+        print(f"Credentials = {credentials}")
+        if len(credentials) == 2:
+            user = repo.get_user_by_name(credentials[1])
+            if user and bcrypt.check_password_hash(user.pw_hash, credentials[0]):
+                login_user(user, remember=False)
+                next_page = request.args.get("next")
+                return (
+                    redirect(next_page) if next_page else redirect(url_for("core.root"))
+                )
+            else:
+                flash(
+                    "Login unsuccessful. Please check access token.",
+                    category="error",
+                )
 
     return render_template("core/auth.html", form=form)

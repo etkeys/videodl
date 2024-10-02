@@ -4,9 +4,9 @@
 {% set class_invalid_message="w3-margin-left w3-text-red" %}
 {% extends "base.html" %}
 {% block content %}
-Alice: 7a3d99b983ca418b85a69c7c56778cd5
+Alice: N2EzZDk5Yjk4M2NhNDE4Yjg1YTY5YzdjNTY3NzhjZDVfYWxpY2U=
 <BR/>
-Bob: 7b330012fd834268945a90717e7a06d0
+Bob: N2IzMzAwMTJmZDgzNDI2ODk0NWE5MDcxN2U3YTA2ZDBfYm9i
     <div class="w3-row">
         <div class="w3-twothird">
             <form method="POST" action="" class="w3-container">
@@ -16,21 +16,6 @@ Bob: 7b330012fd834268945a90717e7a06d0
                         <tr style="visibility: collapse;">
                             <td style="width: 10em;">&nbsp;</td>
                             <td style="width: 100%;">&nbsp;</td>
-                        </tr>
-                        <tr>
-                            <td class="item-details-label">{{ form.user_name.label }}</td>
-                            <td>
-                                {% if form.user_name.errors %}
-                                    {{ form.user_name(class=class_invalid_input) }}
-                                    <div class="{{ class_invalid_message }}">
-                                        {% for error in form.user_name.errors %}
-                                            <span>{{ error }}</span>
-                                        {% endfor %}
-                                    </div>
-                                {% else %}
-                                    {{ form.user_name(class=class_input) }}
-                                {% endif %}
-                            </td>
                         </tr>
                         <tr>
                             <td class="item-details-label">{{ form.access_token.label }}</td>
