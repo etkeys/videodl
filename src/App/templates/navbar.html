@@ -12,7 +12,7 @@
         </div>
     </div>
     <div class="w3-hide-small">
-        <div class="w3-bar-item"><b>{{ app_name }}</b></div>
+        <div class="w3-bar-item"><b>{{ get_app_name() }}</b></div>
         {% if current_user.is_authenticated %}
             <a
             {% if active_nav_item == "downloads" %}

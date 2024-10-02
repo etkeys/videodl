@@ -4,6 +4,8 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
+from App.constants import KEY_APP_NAME, KEY_APP_DEBUG, runtime_context
+
 bcrypt = Bcrypt()
 db = SQLAlchemy()
 login_manager = LoginManager()
@@ -32,6 +34,9 @@ def create_app(config_file: dict, config_section: str, exe_dir: str):
     bcrypt.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
+    runtime_context.init_app(app)
+    runtime_context[KEY_APP_NAME] = app.name
+    runtime_context[KEY_APP_DEBUG] = app.debug
 
     from App import utils
 

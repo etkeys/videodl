@@ -2,6 +2,7 @@ from argparse import ArgumentParser
 from os import path
 
 from App import create_app, constants
+from App.utils import get_app_name
 
 parser = ArgumentParser(
     prog="Video DL",
@@ -31,6 +32,6 @@ if __name__ == "__main__":
         )
         exit(4)
 
-    constants.a_dir_log = app.config[constants.KEY_LOGS_DIR]
+    app.jinja_env.globals.update(get_app_name=get_app_name)
 
     app.run()

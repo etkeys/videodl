@@ -1,5 +1,5 @@
 common: &common
-  flask_name: Video Downloader
+  flask_name: Video DL
   flask_debug: true
   ARTIFACTS_DIR: "{{ EXE_DIR }}/../artifacts"
   LOGS_DIR: "{{ EXE_DIR }}/../logs"

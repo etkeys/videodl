@@ -13,9 +13,9 @@
         <!-- <script src="{{ url_for('static', filename='scripts.js') }}"></script> -->
 
         {% if title %}
-            <title>{{ app_name }} - {{ title }}</title>
+            <title>{{ get_app_name() }} - {{ title }}</title>
         {% else %}
-            <title>{{ app_name }}</title>
+            <title>{{ get_app_name() }}</title>
         {% endif %}
     </head>
     <body>

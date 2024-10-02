@@ -49,7 +49,9 @@ def download_archive_exists(archive_path: str):
 
 
 def get_log_file_contents(log_id: str):
-    log_file = path.join(constants.a_dir_log, f"{log_id}.log")
+    log_file = path.join(
+        constants.runtime_context[constants.KEY_LOGS_DIR], f"{log_id}.log"
+    )
     if not path.isfile(log_file):
         return None
     with open(log_file, "r") as f:
@@ -68,6 +70,14 @@ def datetime_now():
 
 def new_id():
     return str(uuid4())
+
+
+def get_app_name():
+    return constants.runtime_context["app.name"]
+
+
+def get_app_logs_dir():
+    return constants.runtime_context[constants.KEY_LOGS_DIR]
 
 
 # Taken from stackoverflow (by Martin Thoma)
