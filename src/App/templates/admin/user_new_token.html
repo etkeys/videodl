@@ -1,0 +1,29 @@
+{% set active_nav_item = "admin" %}
+{% set title="Admin: New User Token" %}
+{% extends "base.html" %}
+{% block content %}
+<div class="w3-row">
+    <div class="w3-twothird">
+        {% if for_add %}
+            <p>Account for {{ user_name }} has been created! Please send the following to them at {{ user_email }}.</p>
+            {% set preamble = "Your account has been created!" %}
+        {% else %}
+            <p>{{ user_name }} has been reset! Please send the following to them at {{ user_email }}.</p>
+            {% set preamble = "You account has been reset and you've been logged out of you other sessions." %}
+        {% endif %}
+        <div class="w3-2019-vanilla-custard">
+            <pre>
+{{ preamble }}
+Please use the access token below to access your account going forward.
+
+{{ access_token }}
+
+Please treat this access token like a password.
+
+Thank you!
+- Video DL Admin
+            </pre>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -46,6 +46,12 @@ class Repository(object):
         if commit_on_add:
             db.session.commit()
 
+    def add_user(self, name: str, email: str, is_admin: bool, pw_hash: str):
+        user = User(name=name, email=email, is_admin=is_admin, pw_hash=pw_hash)
+
+        db.session.add(user)
+        db.session.commit()
+
     def copy_download_set_items_to_todo(self, user_id: str, download_set_id: str):
         downloadItem2 = aliased(DownloadItem)
 

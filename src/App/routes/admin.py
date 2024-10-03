@@ -3,11 +3,46 @@ from flask import abort, Blueprint, flash, redirect, render_template, Response, 
 from flask_login import current_user, login_required
 
 from App import bcrypt
+from App.forms.admin import AddEditUserForm
 from App.models import repo
 from App.utils import datetime_now, get_log_file_contents, new_id
 from App.utils.Exceptions import UnauthorizedError
 
 admin_blueprint = Blueprint("admin", __name__, url_prefix="/admin")
+
+
+@admin_blueprint.route("users/add", methods=["GET", "POST"])
+@login_required
+def add_user():
+    _abort_403_if_not_admin()
+    form = AddEditUserForm()
+    if form.validate_on_submit():
+        try:
+            pw = new_id()
+            pw_hash = bcrypt.generate_password_hash(pw).decode("utf-8")
+            token = b64encode(f"{pw}_{form.name.data}".encode("utf-8")).decode("utf-8")
+            repo.add_user(
+                name=form.name.data,
+                email=form.email.data,
+                is_admin=form.is_admin.data,
+                pw_hash=pw_hash,
+            )
+
+            flash("User added successfully.", category="success")
+            return render_template(
+                "admin/user_new_token.html",
+                user_name=form.name.data,
+                user_email=form.email.data,
+                access_token=token,
+                for_add=True,
+            )
+
+        except Exception as ex:
+            flash(f"Unable to add user. {ex}", category="error")
+            return render_template("admin/add_edit_user.html", form=form)
+
+    else:
+        return render_template("admin/add_edit_user.html", form=form)
 
 
 @admin_blueprint.post("users/<user_id>/reset")
@@ -25,10 +60,11 @@ def reset_user(user_id: str):
     try:
         repo.update_user(user_id, auth_id=new_auth_id, pw_hash=new_pw_hash)
         return render_template(
-            "admin/reset_user.html",
+            "admin/user_new_token.html",
             user_name=user.name,
             user_email=user.email,
             access_token=new_token,
+            for_add=False,
         )
     except Exception as ex:
         flash(f"Unable to reset user. {ex}")

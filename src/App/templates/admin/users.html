@@ -4,7 +4,10 @@
 {% block content %}
 <div class="w3-row">
     <div class="w3-twothird">
-        <p>The messages recorded from the worker. Current time is: {{ current_time | datetime_to_display }}.</p>
+        <p>Listing of all users in the system (except for yourself)</p>
+        <div class="w3-section">
+            <button type="button" class="w3-btn w3-grey w3-round w3-margin" onclick="location.href='{{ url_for('admin.add_user') }}'">Add User</button>
+        </div>
         <table class="w3-table w3-bordered">
             <tr>
                 <th style="width:15%">Name</th>

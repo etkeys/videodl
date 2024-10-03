@@ -1,0 +1,70 @@
+{% set active_nav_item = "admin" %}
+{% if form.for_edit %}
+    {% set title = "Admin: Edit User" %}
+{% else %}
+    {% set title = "Admin: Add User" %}
+{% endif %}
+{% extends "base.html" %}
+{% set class_invalid_input="w3-input w3-topbar w3-bottombar w3-leftbar w3-rightbar w3-border-red" %}
+{% set class_invalid_message="w3-margin-left w3-text-red" %}
+{% set class_input="w3-input w3-left" %}
+{% block content %}
+<div class="w3-row">
+    <div class="w3-twothird">
+        {% if form.for_edit %}
+            <p>Update the information below for this user.</p>
+        {% else %}
+            <p>Fill out the information below to add a new user.</p>
+        {% endif %}
+        <form method="POST" action="" class="w3-container">
+            {{ form.hidden_tag() }}
+            <fieldset>
+                <table class="item-details">
+                    <tr style="visibility: collapse;">
+                        <td style="width: 7em;">&nbsp;</td>
+                        <td style="width: 100%;">&nbsp;</td>
+                    </tr>
+                    <tr>
+                        <td class="item-details-label">{{ form.name.label }}</td>
+                        <td>
+                            {% if form.name.errors %}
+                                {{ form.name(class=class_invalid_input) }}
+                                <div class="{{ class_invalid_message }}">
+                                    {% for error in form.name.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.name(class=class_input) }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="item-details-label">{{ form.email.label }}</td>
+                        <td>
+                            {% if form.email.errors %}
+                                {{ form.email(class=class_invalid_input) }}
+                                <div class="{{ class_invalid_message }}">
+                                    {% for error in form.email.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% else %}
+                                {{ form.email(class=class_input) }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="item-details-label">{{ form.is_admin.label }}</td>
+                        <td>{{ form.is_admin(class=class_input) }}</td>
+                    </tr>
+                </table>
+            </fieldset>
+            <div class="w3-section">
+                {{ form.submit(class="input-button w3-btn w3-grey w3-round w3-margin") }}
+                <button type="button" class="w3-btn w3-grey w3-round w3-margin" onclick="location.href='{{ url_for('admin.view_users') }}'">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock content %}

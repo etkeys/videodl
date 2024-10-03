@@ -1,7 +1,7 @@
 
 MVP:
 - Combine "todo" table display and downloads/view.html table display.
-- Admin add user
+- Admin edit user (requires access token change to use auth_id, not name)
 - About: Privacy
 - About: Piracy
 - About: Project, request feature/report bug
