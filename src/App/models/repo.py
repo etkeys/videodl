@@ -46,8 +46,12 @@ class Repository(object):
         if commit_on_add:
             db.session.commit()
 
-    def add_user(self, name: str, email: str, is_admin: bool, pw_hash: str):
-        user = User(name=name, email=email, is_admin=is_admin, pw_hash=pw_hash)
+    def add_user(
+        self, name: str, email: str, is_admin: bool, pw_hash: str, auth_id: str
+    ):
+        user = User(
+            name=name, email=email, is_admin=is_admin, pw_hash=pw_hash, auth_id=auth_id
+        )
 
         db.session.add(user)
         db.session.commit()
@@ -287,6 +291,8 @@ class Repository(object):
 
         if "email" in kwargs:
             user.email = kwargs["email"]
+        if "is_admin" in kwargs:
+            user.is_admin = kwargs["is_admin"]
         if "name" in kwargs:
             user.name = kwargs["name"]
         if "pw_hash" in kwargs:

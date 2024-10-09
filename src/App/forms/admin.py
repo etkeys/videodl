@@ -5,7 +5,7 @@ from wtforms.validators import DataRequired
 
 class AddEditUserForm(FlaskForm):
     name = StringField("Name", validators=[DataRequired()])
-    email = EmailField("Email")
+    email = EmailField("Email", validators=[DataRequired()])
     is_admin = BooleanField("Is Admin", default=False)
 
     submit = SubmitField("Submit")

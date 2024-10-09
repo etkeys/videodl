@@ -1,16 +1,16 @@
 
 MVP:
 - Combine "todo" table display and downloads/view.html table display.
-- Admin edit user (requires access token change to use auth_id, not name)
 - About: Privacy
 - About: Piracy
 - About: Project, request feature/report bug
 - Worker: Fail download if another item in the set completed and has same URL.
-- Worker: Fail download if another item in the set completed and has same title.
 - Make all routes use camelCase instead of snake_case.
 - Local postgres database
 - Migrations
-- Recovery account (do after initial migrations setup)
+- Recovery account (do after initial migrations setup; seed this account)
+- Worker: Fail download if another item in the set completed and has same title.
+  (required model change; do after migrations are setup)
 - Test site configuration
 - Production site configuration
 

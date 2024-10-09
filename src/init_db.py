@@ -35,20 +35,22 @@ if __name__ == "__main__":
         users = [
             User(
                 id="d6c8cbb6-9ab6-4f36-b933-9b6ee8a471b8",
+                auth_id="47626fe2-4deb-4b74-91fe-75d74c64310f",
                 email="alice@example.com",
                 name="Alice",
                 pw_hash=bcrypt.generate_password_hash(
-                    "7a3d99b983ca418b85a69c7c56778cd5"
+                    "c1351d23-afbc-4fba-a7d4-fa0f9e18221b"
                 ).decode("utf-8"),
                 is_admin=True,
             ),
             User(
+                id="6fb66c6b-9592-48da-affa-6fa887f241a6",
+                auth_id="2234d4e1-cd61-4e03-9161-e88fce28d606",
                 email="bob@example.com",
                 name="Bob",
                 pw_hash=bcrypt.generate_password_hash(
-                    "7b330012fd834268945a90717e7a06d0"
+                    "1b9bf4a0-770b-4257-836f-75e578d4a518"
                 ).decode("utf-8"),
-                id="6fb66c6b-9592-48da-affa-6fa887f241a6",
             ),
         ]
 

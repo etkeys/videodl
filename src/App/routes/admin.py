@@ -7,6 +7,7 @@ from App.forms.admin import AddEditUserForm
 from App.models import repo
 from App.utils import datetime_now, get_log_file_contents, new_id
 from App.utils.Exceptions import UnauthorizedError
+import App.utils.Authentication as app_auth
 
 admin_blueprint = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -18,14 +19,14 @@ def add_user():
     form = AddEditUserForm()
     if form.validate_on_submit():
         try:
-            pw = new_id()
-            pw_hash = bcrypt.generate_password_hash(pw).decode("utf-8")
-            token = b64encode(f"{pw}_{form.name.data}".encode("utf-8")).decode("utf-8")
+            auth_id, pw_hash, token = app_auth.create_new_credentials()
+
             repo.add_user(
                 name=form.name.data,
                 email=form.email.data,
                 is_admin=form.is_admin.data,
                 pw_hash=pw_hash,
+                auth_id=auth_id,
             )
 
             flash("User added successfully.", category="success")
@@ -45,6 +46,44 @@ def add_user():
         return render_template("admin/add_edit_user.html", form=form)
 
 
+@admin_blueprint.get("users/<user_id>/edit")
+@login_required
+def edit_user(user_id: str):
+    _abort_403_if_not_admin()
+    user = repo.get_user_by_id(user_id)
+    if user is None:
+        abort(404, "Could not find requested user.")
+    form = AddEditUserForm(True)
+    form.name.data = user.name
+    form.email.data = user.email
+    form.is_admin.data = user.is_admin
+
+    return render_template("admin/add_edit_user.html", form=form)
+
+
+@admin_blueprint.post("users/<user_id>/edit")
+@login_required
+def edit_user_submit(user_id: str):
+    _abort_403_if_not_admin()
+    form = AddEditUserForm(True)
+    if form.validate_on_submit():
+        try:
+            repo.update_user(
+                user_id,
+                name=form.name.data,
+                email=form.email.data,
+                is_admin=form.is_admin.data,
+            )
+        except Exception as ex:
+            flash(f"Cannot save changes. {ex}", category="error")
+            return render_template("admin/add_edit_user.html", form=form)
+
+        flash(f"User updated successfully.", category="success")
+        return redirect(url_for("admin.view_users"))
+
+    return render_template("admin/add_edit_user.html", form=form)
+
+
 @admin_blueprint.post("users/<user_id>/reset")
 @login_required
 def reset_user(user_id: str):
@@ -52,10 +91,8 @@ def reset_user(user_id: str):
     user = repo.get_user_by_id(user_id)
     if user.id == current_user.id:
         abort(422, "Cannot reset yourself")
-    new_auth_id = new_id()
-    new_pw = new_id()
-    new_pw_hash = bcrypt.generate_password_hash(new_pw).decode("utf-8")
-    new_token = b64encode(f"{new_pw}_{user.name}".encode("utf-8")).decode("utf-8")
+
+    new_auth_id, new_pw_hash, new_access_token = app_auth.create_new_credentials()
 
     try:
         repo.update_user(user_id, auth_id=new_auth_id, pw_hash=new_pw_hash)
@@ -63,7 +100,7 @@ def reset_user(user_id: str):
             "admin/user_new_token.html",
             user_name=user.name,
             user_email=user.email,
-            access_token=new_token,
+            access_token=new_access_token,
             for_add=False,
         )
     except Exception as ex:
