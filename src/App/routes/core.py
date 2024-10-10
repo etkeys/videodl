@@ -1,8 +1,9 @@
-from base64 import b64decode
+from markdown import Markdown
+from markdown.extensions.toc import TocExtension
+from os import path
 from flask import Blueprint, flash, redirect, render_template, request, url_for
 from flask_login import current_user, login_required, login_user
 
-from App import bcrypt
 from App.models import repo
 from App.forms.core import AuthenticateForm
 import App.utils.Authentication as app_auth
@@ -43,3 +44,13 @@ def authenticate():
             )
 
     return render_template("core/auth.html", form=form)
+
+
+@core_blueprint.get("/about")
+@login_required
+def view_about():
+    md = Markdown(extensions=[TocExtension(toc_depth="3-6")])
+    with open(path.join("App", "static", "about.md")) as f:
+        html = md.convert(f.read())
+
+    return render_template("core/about.html", md_content=html)

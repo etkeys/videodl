@@ -1,9 +1,6 @@
 
 MVP:
 - Combine "todo" table display and downloads/view.html table display.
-- About: Privacy
-- About: Piracy
-- About: Project, request feature/report bug
 - Worker: Fail download if another item in the set completed and has same URL.
 - Make all routes use camelCase instead of snake_case.
 - Local postgres database

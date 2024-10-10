@@ -1,16 +1,11 @@
 
-<!-- Mobile sidebar menu-->
-<div id="mobile-sidebar-menu" class="w3-sidebar w3-bar-block w3-border-right w3-center w3-2019-pink-peacock" style="display:none;">
-    <div class="w3-bar-item"><b>{{ app_name }}</b></div>
-
-</div>
 
 <nav class="w3-bar w3-2019-pink-peacock" >
-    <div class="w3-hide-large w3-hide-medium">
+    <!-- <div class="w3-hide-large w3-hide-medium">
         <button class="w3-bar-item w3-button w3-large" onclick="clickToggleBlockDisplay('mobile-sidebar-menu')">
             <i class="fa fa-bars" aria-hidden="true"></i>
         </div>
-    </div>
+    </div> -->
     <div class="w3-hide-small">
         <div class="w3-bar-item"><b>{{ get_app_name() }}</b></div>
         {% if current_user.is_authenticated %}
@@ -26,17 +21,22 @@
                 href="{{ url_for('todo.display_todo') }}" class="w3-bar-item w3-button">To Do</a>
             {% if current_user.is_admin %}
                 <div class="w3-dropdown-hover">
-                        <button
-                            {% if active_nav_item == "admin" %}
-                                id="active-nav-item"
-                            {% endif %}
-                                class="w3-button">Admin</button>
-                        <div class="w3-dropdown-content w3-bar-block w3-card-4">
-                            <a href="{{ url_for('admin.view_users') }}" class="w3-bar-item w3-button">Users</a>
-                            <a href="{{ url_for('admin.view_worker_messages') }}" class="w3-bar-item w3-button">Worker Log</a>
-                        </div>
+                    <button
+                        {% if active_nav_item == "admin" %}
+                            id="active-nav-item"
+                        {% endif %}
+                            class="w3-button">Admin</button>
+                    <div class="w3-dropdown-content w3-bar-block w3-card-4">
+                        <a href="{{ url_for('admin.view_users') }}" class="w3-bar-item w3-button">Users</a>
+                        <a href="{{ url_for('admin.view_worker_messages') }}" class="w3-bar-item w3-button">Worker Log</a>
+                    </div>
                 </div>
             {% endif %}
+            <a
+            {% if active_nav_item == "about" %}
+                id="active-nav-item"
+            {% endif %}
+                href="{{ url_for('core.view_about') }}" class="w3-bar-item w3-button w3-right">About</a>
         {% else %}
         &nbsp;
         {% endif %}

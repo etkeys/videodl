@@ -1,0 +1,12 @@
+{% set active_nav_item = "about" %}
+{% set title="About" %}
+{% extends "base.html" %}
+{% block content %}
+<div class="w3-row">
+    <div class="w3-twothird">
+        <div id="markdown-content">
+{{ md_content|safe }}
+        </div>
+    </div>
+</div>
+{% endblock content %}
