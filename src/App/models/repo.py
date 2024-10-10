@@ -308,6 +308,16 @@ class WorkerRepository:
         db.session.add(m)
         db.session.commit()
 
+    def any_completed_items_with_url(self, download_set_id: str, url: str):
+        return (
+            DownloadItem.query.filter_by(
+                download_set_id=download_set_id,
+                status=DownloadItemStatus.COMPLETED,
+                url=url,
+            ).count()
+            > 0
+        )
+
     def get_oldest_queued_download_item(self, download_set_id: str):
         return (
             DownloadItem.query.filter_by(

@@ -1,6 +1,5 @@
 
 MVP:
-- Worker: Fail download if another item in the set completed and has same URL.
 - Make all routes use camelCase instead of snake_case.
 - Local postgres database
 - Migrations

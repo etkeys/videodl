@@ -100,7 +100,8 @@ if __name__ == "__main__":
             ),
             DownloadItem(
                 download_set_id="ecfab23e-5658-43f4-96a4-edb3f644041d",
-                url="https://bar.com/2",
+                # url="https://bar.com/2",
+                url="https://bar.com/1",
                 title="Download set 2 #2",
                 added_datetime=now_time - timedelta(days=1, hours=20, minutes=43),
                 status=DownloadItemStatus.QUEUED,

@@ -73,6 +73,9 @@ def do_download(
     repo.update_download_item_status(item, DownloadItemStatus.DOWNLOADING)
 
     try:
+        if repo.any_completed_items_with_url(item.download_set_id, item.url):
+            raise RuntimeError("An already completed item has the same URL.")
+
         with TemporaryDirectory() as temp_dir:
             file_name = create_safe_file_name(item.title, item.audio_only)
             download_file = path.join(temp_dir, file_name)
