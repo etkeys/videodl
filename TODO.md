@@ -1,6 +1,5 @@
 
 MVP:
-- Combine "todo" table display and downloads/view.html table display.
 - Worker: Fail download if another item in the set completed and has same URL.
 - Make all routes use camelCase instead of snake_case.
 - Local postgres database
@@ -8,6 +7,9 @@ MVP:
 - Recovery account (do after initial migrations setup; seed this account)
 - Worker: Fail download if another item in the set completed and has same title.
   (required model change; do after migrations are setup)
+- Worker: vary the sleep time between downloading items.
+- App: SystemD service
+- Worker: SystemD service
 - Test site configuration
 - Production site configuration
 
@@ -20,3 +22,7 @@ After MVP:
 - Fix mutable global variables (runtime_context)
 - Implement inactivating a user. Also terminate any downloads in progress and
   future
+- Combine "todo" table display and downloads/view.html table display.
+- Make page stylings better. Currently everything is left aligned and two-thirds
+  of the page.
+- Make site mobile/small device friendly
