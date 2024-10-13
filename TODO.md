@@ -1,7 +1,6 @@
 
 MVP:
 - Make all routes use camelCase instead of snake_case.
-- Local postgres database
 - Migrations
 - Recovery account (do after initial migrations setup; seed this account)
 - Worker: Fail download if another item in the set completed and has same title.
@@ -10,6 +9,7 @@ MVP:
 - App: SystemD service
 - Worker: SystemD service
 - Test site configuration
+    - postgres port will need to be different to not collide with production
 - Production site configuration
 
 After MVP:
@@ -25,3 +25,5 @@ After MVP:
 - Make page stylings better. Currently everything is left aligned and two-thirds
   of the page.
 - Make site mobile/small device friendly
+- Bug: While processing items, when the status of an item changes, it gets sent
+  to the bottom of the list.

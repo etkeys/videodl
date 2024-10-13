@@ -1,0 +1,15 @@
+
+services:
+    db:
+        image: postgres:16.4
+        container_name: videodl-db
+        restart: unless-stopped
+        env_file:
+            - ./videodl_postgres.dev.env
+        ports:
+            - 127.0.0.1:18182:5432
+        volumes:
+            - videodl-db-data:/var/lib/postgresql/data
+
+volumes:
+    videodl-db-data:

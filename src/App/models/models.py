@@ -65,15 +65,13 @@ class DownloadSetStatus(enum.Enum):
 
 
 class User(db.Model, UserMixin):
-    __tablename__ = "Users"
-    id = mapped_column(
-        String(36, collation="NOCASE"), primary_key=True, default=utils.new_id
-    )
+    __tablename__ = "users"
+    id = mapped_column(String(36), primary_key=True, default=utils.new_id)
     auth_id = mapped_column(
         String(36), unique=True, nullable=False, default=utils.new_id
     )
-    email = mapped_column(String(255, collation="NOCASE"), unique=True, nullable=False)
-    name = mapped_column(String(255, collation="NOCASE"), unique=True, nullable=False)
+    email = mapped_column(String(255), unique=True, nullable=False)
+    name = mapped_column(String(255), unique=True, nullable=False)
     pw_hash = mapped_column(String(60), nullable=False)
     is_admin = mapped_column(Boolean(), nullable=False, default=False)
 
@@ -87,13 +85,9 @@ class User(db.Model, UserMixin):
 
 
 class DownloadSet(db.Model):
-    __tablename__ = "DownloadSets"
-    id = mapped_column(
-        String(36, collation="NOCASE"), primary_key=True, default=utils.new_id
-    )
-    user_id = mapped_column(
-        String(36, collation="NOCASE"), ForeignKey("Users.id"), nullable=False
-    )
+    __tablename__ = "download_sets"
+    id = mapped_column(String(36), primary_key=True, default=utils.new_id)
+    user_id = mapped_column(String(36), ForeignKey("users.id"), nullable=False)
     status = mapped_column(
         SqlEnum(DownloadSetStatus), nullable=False, default=DownloadSetStatus.TODO
     )
@@ -147,25 +141,21 @@ class DownloadSet(db.Model):
 
 
 class DownloadItem(db.Model):
-    __tablename__ = "DownloadItems"
-    id = mapped_column(
-        String(36, collation="NOCASE"), primary_key=True, default=utils.new_id
-    )
+    __tablename__ = "download_items"
+    id = mapped_column(String(36), primary_key=True, default=utils.new_id)
     status = mapped_column(
         SqlEnum(DownloadItemStatus), nullable=False, default=DownloadItemStatus.TODO
     )
-    title = mapped_column(String(255, collation="NOCASE"), nullable=False)
+    title = mapped_column(String(255), nullable=False)
     audio_only = mapped_column(Boolean(), nullable=False, default=False)
-    url = mapped_column(String(255, collation="NOCASE"), nullable=False)
+    url = mapped_column(String(255), nullable=False)
     added_datetime = mapped_column(
         TIMESTAMP(), nullable=False, default=utils.datetime_now
     )
     download_set_id = mapped_column(
-        String(36, collation="NOCASE"), ForeignKey("DownloadSets.id"), nullable=False
+        String(36), ForeignKey("download_sets.id"), nullable=False
     )
-    copied_from_id = mapped_column(
-        String(36, collation="NOCASE"), ForeignKey("DownloadItems.id")
-    )
+    copied_from_id = mapped_column(String(36), ForeignKey("download_items.id"))
 
     copied_from = relationship("DownloadItem", back_populates="copied_to")
     copied_to = relationship(
@@ -216,7 +206,7 @@ class DownloadItem(db.Model):
 
 
 class WorkerMessage(db.Model):
-    __tablename__ = "WorkerMessages"
+    __tablename__ = "worker_messages"
     id = mapped_column(Integer, primary_key=True, autoincrement=True)
     recorded_datetime = mapped_column(
         TIMESTAMP(), nullable=False, unique=True, default=utils.datetime_now

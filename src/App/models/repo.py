@@ -1,5 +1,5 @@
 from sqlalchemy.sql import or_
-from sqlalchemy.orm import aliased, joinedload, SessionTransaction
+from sqlalchemy.orm import aliased, joinedload
 
 from .models import *
 
