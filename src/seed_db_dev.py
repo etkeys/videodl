@@ -7,6 +7,7 @@ from App.utils import datetime_now
 
 
 if __name__ == "__main__":
+    print("Seeding database...")
     app = create_app()
 
     now_time = datetime_now()
