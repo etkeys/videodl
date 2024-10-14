@@ -12,7 +12,6 @@ if __name__ == "__main__":
 
     now_time = datetime_now()
     with app.app_context():
-        db.create_all()
 
         users = [
             User(

@@ -1,7 +1,7 @@
-import yaml
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
+from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 
 import App.constants as constants
@@ -10,6 +10,7 @@ from App.Config import Config
 
 bcrypt = Bcrypt()
 db = SQLAlchemy()
+migrate = Migrate()
 login_manager = LoginManager()
 login_manager.login_message = "You must authenticate to access this page."
 login_manager.login_message_category = "warning"
@@ -42,6 +43,7 @@ def create_app():
     bcrypt.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
+    migrate.init_app(app, db)
     constants.runtime_context.init_app(app)
 
     from App import utils
