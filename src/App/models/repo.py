@@ -233,7 +233,11 @@ class Repository(object):
         user = self.get_user_by_id(user_id)
         if not user.is_admin:
             raise UnauthorizedError("User is not authorized for this data.")
-        return User.query.where(User.id != user_id).order_by(User.name).all()
+        return (
+            User.query.where(User.id != user_id, User.name != "recovery")
+            .order_by(User.name)
+            .all()
+        )
 
     def get_worker_messages(self, user_id: str):
         user = self.get_user_by_id(user_id)

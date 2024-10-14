@@ -1,7 +1,6 @@
 
 MVP:
 - Make all routes use camelCase instead of snake_case.
-- Recovery account (do after initial migrations setup; seed this account)
 - Worker: Fail download if another item in the set completed and has same title.
   (required model change; do after migrations are setup)
 - Worker: vary the sleep time between downloading items.
