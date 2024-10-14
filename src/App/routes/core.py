@@ -19,6 +19,16 @@ def root():
     return redirect(url_for("downloads.display_downloads"))
 
 
+@core_blueprint.get("/about")
+@login_required
+def view_about():
+    md = Markdown(extensions=[TocExtension(toc_depth="3-6")])
+    with open(path.join("App", "static", "about.md")) as f:
+        html = md.convert(f.read())
+
+    return render_template("core/about.html", md_content=html)
+
+
 @core_blueprint.route("/auth", methods=["GET", "POST"])
 def authenticate():
     if current_user.is_authenticated:
@@ -44,13 +54,3 @@ def authenticate():
             )
 
     return render_template("core/auth.html", form=form)
-
-
-@core_blueprint.get("/about")
-@login_required
-def view_about():
-    md = Markdown(extensions=[TocExtension(toc_depth="3-6")])
-    with open(path.join("App", "static", "about.md")) as f:
-        html = md.convert(f.read())
-
-    return render_template("core/about.html", md_content=html)

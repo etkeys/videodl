@@ -149,7 +149,7 @@ def view_users():
     return render_template("admin/users.html", users=users)
 
 
-@admin_blueprint.get("worker_log")
+@admin_blueprint.get("workerLog")
 @login_required
 def view_worker_messages():
     _abort_403_if_not_admin()

@@ -28,7 +28,7 @@ status_color_map_ds = {
 downloads_blueprint = Blueprint("downloads", __name__, url_prefix="/downloads")
 
 
-@downloads_blueprint.post("/<download_set_id>/add_all_items_to_todo")
+@downloads_blueprint.post("/<download_set_id>/addAllItemsToTodo")
 @login_required
 def add_all_items_to_todo(download_set_id: str):
     ds = repo.get_download_set_by_id(current_user.id, download_set_id)
@@ -52,7 +52,7 @@ def add_all_items_to_todo(download_set_id: str):
     return redirect(url_for("downloads.view_download_set", id=download_set_id))
 
 
-@downloads_blueprint.post("/<download_set_id>/add_failed_to_todo/<item_id>")
+@downloads_blueprint.post("/<download_set_id>/addFailedToTodo/<item_id>")
 @login_required
 def add_failed_item_to_todo(download_set_id, item_id):
     ds = repo.get_download_set_by_id(current_user.id, download_set_id)
@@ -81,7 +81,7 @@ def add_failed_item_to_todo(download_set_id, item_id):
     return redirect(url_for("downloads.view_download_set", id=download_set_id))
 
 
-@downloads_blueprint.post("/<download_set_id>/add_failed_to_todo")
+@downloads_blueprint.post("/<download_set_id>/addFailedToTodo")
 @login_required
 def add_all_failed_items_to_todo(download_set_id):
     ds = repo.get_download_set_by_id(current_user.id, download_set_id)
