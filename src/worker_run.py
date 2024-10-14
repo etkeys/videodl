@@ -1,5 +1,5 @@
 from argparse import ArgumentParser
-from datetime import datetime, timezone, timedelta
+from datetime import timedelta
 from os import makedirs, path
 from random import choice
 import subprocess
@@ -28,14 +28,6 @@ def get_arg_parser():
         prog="Video DL Background Worker",
         description="A background script that performs the actual downloading of videos",
         add_help=True,
-    )
-
-    parser.add_argument(
-        "-c",
-        "--config",
-        action="store",
-        default=constants.DEFAULT_CONFIG_FILE,
-        help=f"Path to the config file to load. Paths are relative to run.py. (default: {constants.DEFAULT_CONFIG_FILE})",
     )
 
     parser.add_argument(
@@ -138,31 +130,29 @@ def pack_up_download_items(ds: DownloadSet):
 if __name__ == "__main__":
     args = get_arg_parser().parse_args()
 
-    script_dir = path.dirname(path.abspath(__file__))
-
-    app = create_app(args.config, "worker_config", script_dir)
+    app = create_app()
 
     if not app.debug:
         args.random_fail_downloading = False
         args.random_fail_finalizing = False
 
-    if not path.isdir(app.config[constants.KEY_ARTIFACTS_DIR]):
+    g_dir_artifacts = app.config[constants.KEY_CONFIG_DIR_ARTIFACTS]
+    g_dir_logs = app.config[constants.KEY_CONFIG_DIR_LOGS]
+
+    if not path.isdir(g_dir_artifacts):
         log(
-            f"Directory '{app.config[constants.KEY_ARTIFACTS_DIR]}' does not exist. Exiting.",
+            f"Directory '{g_dir_artifacts}' does not exist. Exiting.",
             LogLevel.ERROR,
         )
         exit(4)
-    if not path.isdir(app.config[constants.KEY_LOGS_DIR]):
+    if not path.isdir(g_dir_logs):
         log(
-            f"Directory '{app.config[constants.KEY_LOGS_DIR]}' does not exist. Exiting.",
+            f"Directory '{g_dir_logs}' does not exist. Exiting.",
             LogLevel.ERROR,
         )
         exit(4)
 
-    g_dir_artifacts = app.config[constants.KEY_ARTIFACTS_DIR]
-    g_dir_logs = app.config[constants.KEY_LOGS_DIR]
-
-    default_timeout = app.config[constants.KEY_DEFAULT_WAIT_SECONDS]
+    default_timeout = app.config[constants.KEY_CONFIG_WORKER_DEFAULT_WAIT_SECONDS]
     rate_limit_timeouts = range(35, 61)
 
     log("Entering main loop.", LogLevel.INFOLOW)
@@ -205,6 +195,6 @@ if __name__ == "__main__":
                     timeout = choice(rate_limit_timeouts)
 
         log(
-            f"Sleeping for {timeout} seconds. Wake up at: {datetime_now() + timedelta(seconds=timeout)}."
+            f"Sleeping for {timeout} seconds. Wake up at: {datetime_now() + timedelta(seconds=int(timeout))}."
         )
-        sleep(timeout)
+        sleep(int(timeout))

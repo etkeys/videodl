@@ -50,7 +50,7 @@ def download_archive_exists(archive_path: str):
 
 def get_log_file_contents(log_id: str):
     log_file = path.join(
-        constants.runtime_context[constants.KEY_LOGS_DIR], f"{log_id}.log"
+        constants.runtime_context[constants.KEY_CONFIG_DIR_LOGS], f"{log_id}.log"
     )
     if not path.isfile(log_file):
         return None
@@ -61,7 +61,7 @@ def get_log_file_contents(log_id: str):
 def maybe_datetime_to_display_string(d: datetime | None) -> str:
     if not d:
         return ""
-    return d.strftime(constants._DATE_TIME_DISPLAY_FORMAT)
+    return d.strftime(constants.DATE_TIME_DISPLAY_FORMAT)
 
 
 def datetime_now():
@@ -73,11 +73,11 @@ def new_id():
 
 
 def get_app_name():
-    return constants.runtime_context["app.name"]
+    return constants.runtime_context[constants.KEY_CONFIG_APP_NAME]
 
 
 def get_app_logs_dir():
-    return constants.runtime_context[constants.KEY_LOGS_DIR]
+    return constants.runtime_context[constants.KEY_CONFIG_DIR_LOGS]
 
 
 # Taken from stackoverflow (by Martin Thoma)

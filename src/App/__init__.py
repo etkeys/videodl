@@ -4,7 +4,9 @@ from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 
-from App.constants import KEY_APP_NAME, KEY_APP_DEBUG, runtime_context
+import App.constants as constants
+from App.Config import Config
+
 
 bcrypt = Bcrypt()
 db = SQLAlchemy()
@@ -14,29 +16,33 @@ login_manager.login_message_category = "warning"
 login_manager.login_view = "core.authenticate"
 
 
-def create_app(config_file: dict, config_section: str, exe_dir: str):
+def create_app():
     app = Flask(__name__)
+    app.config.from_object(Config)
 
-    config = read_yaml_config(config_file)[config_section]
+    app.debug = bool(app.config[constants.KEY_CONFIG_DEBUG_MODE])
+    app.name = app.config[constants.KEY_CONFIG_APP_NAME]
 
-    if "flask_debug" in config:
-        app.debug = config["flask_debug"]
-    if "flask_name" in config:
-        app.name = config["flask_name"]
+    db_address = app.config[constants.KEY_CONFIG_DB_ADDRESS]
+    db_catalog = app.config[constants.KEY_CONFIG_DB_CATALOG]
+    db_password = app.config[constants.KEY_CONFIG_DB_PASSWORD]
+    db_user = app.config[constants.KEY_CONFIG_DB_USER]
 
-    for key, val in config.items():
+    app.config["SQLALCHEMY_DATABASE_URI"] = (
+        f"postgresql://{db_user}:{db_password}@{db_address}/{db_catalog}"
+    )
+
+    for key, val in app.config.items():
         if key.isupper():
-            if isinstance(val, str) and "{{ EXE_DIR }}" in val:
-                app.config[key] = val.replace("{{ EXE_DIR }}", exe_dir)
+            if isinstance(val, str) and "{{ APP_DIR }}" in val:
+                app.config[key] = val.replace("{{ APP_DIR }}", app.root_path)
             else:
                 app.config[key] = val
 
     bcrypt.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
-    runtime_context.init_app(app)
-    runtime_context[KEY_APP_NAME] = app.name
-    runtime_context[KEY_APP_DEBUG] = app.debug
+    constants.runtime_context.init_app(app)
 
     from App import utils
 
@@ -57,10 +63,3 @@ def create_app(config_file: dict, config_section: str, exe_dir: str):
     app.register_blueprint(todo_blueprint)
 
     return app
-
-
-def read_yaml_config(config_file):
-    with open(config_file) as f:
-        y = yaml.safe_load(f)
-
-    return y

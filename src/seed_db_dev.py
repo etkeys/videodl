@@ -1,32 +1,13 @@
-from argparse import ArgumentParser
 from datetime import timedelta
 from os import path
 
-from App import bcrypt, db, constants, create_app
+from App import bcrypt, db, create_app
 from App.models import *
 from App.utils import datetime_now
 
 
-parser = ArgumentParser(
-    prog="Video DL (init db)",
-    description="Script to initialize a database",
-    add_help=True,
-)
-
-parser.add_argument(
-    "-c",
-    "--config",
-    action="store",
-    default=constants.DEFAULT_CONFIG_FILE,
-    help=f"Path to the config file to load. Paths are relative to run.py. (default: {constants.DEFAULT_CONFIG_FILE})",
-)
-
 if __name__ == "__main__":
-    args = parser.parse_args()
-
-    script_dir = path.dirname(path.abspath(__file__))
-
-    app = create_app(args.config, "app_config", script_dir)
+    app = create_app()
 
     now_time = datetime_now()
     with app.app_context():
