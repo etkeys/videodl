@@ -3,7 +3,7 @@ from os import path
 
 from App import bcrypt, db, create_app
 from App.models import *
-from App.utils import datetime_now
+from App.utils import create_safe_file_name, datetime_now
 
 
 if __name__ == "__main__":
@@ -97,7 +97,7 @@ if __name__ == "__main__":
             DownloadItem(
                 download_set_id="ecfab23e-5658-43f4-96a4-edb3f644041d",
                 url="https://bar.com/4",
-                title="Download set 2 #4",
+                title="Download set 2 #1",
                 added_datetime=now_time - timedelta(days=1, hours=19, minutes=57),
                 status=DownloadItemStatus.QUEUED,
             ),
@@ -121,5 +121,9 @@ if __name__ == "__main__":
 
         db.session.add_all(users)
         db.session.add_all(download_sets)
+
+        for item in download_items:
+            item.file_name = create_safe_file_name(item.title, item.audio_only)
         db.session.add_all(download_items)
+
         db.session.commit()

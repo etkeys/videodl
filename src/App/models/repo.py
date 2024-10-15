@@ -16,6 +16,7 @@ class Repository(object):
         title: str,
         audio_only: bool,
         url: str,
+        file_name: str,
         copy_from_id: str | None = None,
         commit_on_add: bool = True,
     ):
@@ -35,7 +36,11 @@ class Repository(object):
         ds = self.get_todo_download_set(user_id)
 
         item = DownloadItem(
-            title=title, audio_only=audio_only, url=url, download_set_id=ds.id
+            title=title,
+            audio_only=audio_only,
+            url=url,
+            download_set_id=ds.id,
+            file_name=file_name,
         )
 
         if copy_from_id is not None:
@@ -79,7 +84,13 @@ class Repository(object):
 
         for item in items:
             self.add_download_item(
-                user_id, item.title, item.audio_only, item.url, item.id, False
+                user_id,
+                item.title,
+                item.audio_only,
+                item.url,
+                item.file_name,
+                item.id,
+                False,
             )
             db.session.commit()
 
@@ -285,6 +296,8 @@ class Repository(object):
             item.audio_only = bool(kwargs["audio_only"])
         if "url" in kwargs:
             item.url = str(kwargs["url"])
+        if "file_name" in kwargs:
+            item.file_name = str(kwargs["file_name"])
 
         db.session.commit()
 
@@ -311,6 +324,16 @@ class WorkerRepository:
         m = WorkerMessage(level=level, message=message)
         db.session.add(m)
         db.session.commit()
+
+    def any_completed_items_with_file_name(self, download_set_id: str, file_name: str):
+        return (
+            DownloadItem.query.filter_by(
+                download_set_id=download_set_id,
+                status=DownloadItemStatus.COMPLETED,
+                file_name=file_name,
+            ).count()
+            > 0
+        )
 
     def any_completed_items_with_url(self, download_set_id: str, url: str):
         return (

@@ -149,6 +149,7 @@ class DownloadItem(db.Model):
     title = mapped_column(String(255), nullable=False)
     audio_only = mapped_column(Boolean(), nullable=False, default=False)
     url = mapped_column(String(255), nullable=False)
+    file_name = mapped_column(String(255), nullable=False)
     added_datetime = mapped_column(
         TIMESTAMP(), nullable=False, default=utils.datetime_now
     )

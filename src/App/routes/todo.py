@@ -3,6 +3,7 @@ from flask_login import current_user, login_required
 
 from App.forms.todo import DownloadItemDetailsForm
 from App.models import repo
+from App.utils import create_safe_file_name
 
 todo_blueprint = Blueprint("todo", __name__, url_prefix="/todo")
 
@@ -13,8 +14,13 @@ def add_item():
     form = DownloadItemDetailsForm()
     if form.validate_on_submit():
         try:
+            file_name = create_safe_file_name(form.title.data, form.audio_only.data)
             repo.add_download_item(
-                current_user.id, form.title.data, form.audio_only.data, form.url.data
+                current_user.id,
+                form.title.data,
+                form.audio_only.data,
+                form.url.data,
+                file_name,
             )
             flash(f"Item added successfully.", category="success")
             return redirect(url_for("todo.display_todo"))
@@ -59,12 +65,14 @@ def edit_item_submit(id):
             abort(404, description=f"Could not find item with Id of '{id}'.")
 
         try:
+            file_name = create_safe_file_name(form.title.data, form.audio_only.data)
             repo.update_item(
                 current_user.id,
                 id,
                 title=form.title.data,
                 audio_only=form.audio_only.data,
                 url=form.url.data,
+                file_name=file_name,
             )
             flash("Item updated successfully.", category="success")
             return redirect(url_for("todo.display_todo"))

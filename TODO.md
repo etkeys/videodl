@@ -1,7 +1,5 @@
 
 MVP:
-- Worker: Fail download if another item in the set completed and has same title.
-  (required model change; do after migrations are setup)
 - App: SystemD service
 - Worker: SystemD service
 - Worker: Actually do download
@@ -23,4 +21,4 @@ After MVP:
   of the page.
 - Make site mobile/small device friendly
 - Bug: While processing items, when the status of an item changes, it gets sent
-  to the bottom of the list.
+  to the bottom of the list. [This is how postgres works](https://dba.stackexchange.com/a/259825)

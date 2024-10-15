@@ -71,10 +71,11 @@ def add_failed_item_to_todo(download_set_id, item_id):
     if not repo.is_item_copied_to_todo(current_user.id, item.id):
         repo.add_download_item(
             current_user.id,
-            title=item.title,
-            audio_only=item.audio_only,
-            url=item.url,
-            copy_from_id=item.id,
+            item.title,
+            item.audio_only,
+            item.url,
+            item.file_name,
+            item.id,
         )
 
     flash("Item copied to To Do sucessfully.", category="success")
@@ -94,10 +95,11 @@ def add_all_failed_items_to_todo(download_set_id):
         if not repo.is_item_copied_to_todo(current_user.id, item.id):
             repo.add_download_item(
                 current_user.id,
-                title=item.title,
-                audio_only=item.audio_only,
-                url=item.url,
-                copy_from_id=item.id,
+                item.title,
+                item.audio_only,
+                item.url,
+                item.file_name,
+                item.id,
             )
 
     flash("Items copied to To Do successfully.", category="success")
