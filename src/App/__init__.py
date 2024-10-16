@@ -57,6 +57,7 @@ def create_app():
     from App import utils
 
     app.jinja_env.globals.update(get_app_name=utils.get_app_name)
+    app.jinja_env.globals.update(is_environment_development=utils.is_environment_development)
 
     app.jinja_env.filters["datetime_to_display"] = (
         utils.maybe_datetime_to_display_string

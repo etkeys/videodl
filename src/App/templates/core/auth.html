@@ -4,9 +4,11 @@
 {% set class_invalid_message="w3-margin-left w3-text-red" %}
 {% extends "base.html" %}
 {% block content %}
+{% if is_environment_development() %}
 Alice: NDc2MjZmZTItNGRlYi00Yjc0LTkxZmUtNzVkNzRjNjQzMTBmX2MxMzUxZDIzLWFmYmMtNGZiYS1hN2Q0LWZhMGY5ZTE4MjIxYg==
 <BR/>
 Bob: MjIzNGQ0ZTEtY2Q2MS00ZTAzLTkxNjEtZTg4ZmNlMjhkNjA2XzFiOWJmNGEwLTc3MGItNDI1Ny04MzZmLTc1ZTU3OGQ0YTUxOA==
+{% endif %}
     <div class="w3-row">
         <div class="w3-twothird">
             <form method="POST" action="" class="w3-container">

@@ -79,6 +79,9 @@ def get_app_name():
 def get_app_logs_dir():
     return constants.runtime_context[constants.KEY_CONFIG_DIR_LOGS]
 
+def is_environment_development():
+    return constants.runtime_context[constants.KEY_CONFIG_ENVIRONMENT] == 'development'
+
 
 # Taken from stackoverflow (by Martin Thoma)
 # https://stackoverflow.com/a/33245492
