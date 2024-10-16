@@ -3,12 +3,12 @@ from datetime import timedelta
 from os import makedirs, path
 from random import choice
 import subprocess
-from shutil import copy2, make_archive
+from shutil import make_archive, move
 from tempfile import TemporaryDirectory
 from time import sleep
 from traceback import format_exc
 
-from App import constants, create_app
+from App import constants, create_app 
 from App.models import (
     DownloadItem,
     DownloadItemStatus,
@@ -21,6 +21,7 @@ from App.utils import create_safe_file_name, datetime_now
 
 g_dir_artifacts = None
 g_dir_logs = None
+g_simulate = False
 
 
 def get_arg_parser():
@@ -40,6 +41,12 @@ def get_arg_parser():
         "--random-fail-finalizing",
         action="store_true",
         help=f"Occasionally, finalizing an item may fail (development only)",
+    )
+
+    parser.add_argument(
+        "--simulate",
+        action="store_true",
+        help="Toggles between actually performing download or creating fake files. In development mode, passing this flag will have the opposite effect."
     )
 
     return parser
@@ -79,13 +86,21 @@ def do_download(
             if random_fail_download and choice([1, 2, 3, 4, 5]) < 3:
                 raise Exception("Random fail event.")
 
+            if g_simulate:
+                run_args = ["dd", "if=/dev/urandom", f"of={download_file}", "bs=1KB", "count=1"]
+            else:
+                run_args = ["yt-dlp", "--verbose", "--restrict-filename", "--paths", temp_dir]
+                if item.audio_only:
+                    run_args += ["--extract-audio", "--audio-format", "mp3"]
+                run_args += [item.url, "--exec", f"cp {{}} {download_file}"]
+
             ret = subprocess.run(
-                ["dd", "if=/dev/urandom", f"of={download_file}", "bs=1KB", "count=1"],
+                run_args,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
             )
 
-            log(ret.stdout.decode("utf-8"), LogLevel.INFOLOW, log_id=item.id)
+            log(ret.stdout.decode("utf-8"), LogLevel.DEBUG, log_id=item.id)
 
             if ret.returncode == 0:
                 log("Download complete. Moving to finalize.", LogLevel.INFOLOW)
@@ -95,12 +110,15 @@ def do_download(
                 repo.update_download_item_status(item, DownloadItemStatus.FAILED)
                 return
 
+            log("Waiting 2 seconds for file system to catch up.", LogLevel.DEBUG, log_id=item.id)
+            sleep(2)
+
             ds_art_dir = path.join(g_dir_artifacts, item.download_set_id)
             if not path.isdir(ds_art_dir):
                 makedirs(ds_art_dir)
 
             log("Copying file to artifacts directory.", LogLevel.INFOLOW)
-            copy2(download_file, ds_art_dir)
+            move(download_file, ds_art_dir)
 
             if random_fail_finalize and choice([1, 2, 3, 4, 5]) < 3:
                 raise Exception("Random fail event.")
@@ -140,6 +158,10 @@ if __name__ == "__main__":
 
     g_dir_artifacts = app.config[constants.KEY_CONFIG_DIR_ARTIFACTS]
     g_dir_logs = app.config[constants.KEY_CONFIG_DIR_LOGS]
+    if app.debug:
+        g_simulate = not args.simulate
+    else:
+        g_simulate = args.simulate
 
     if not path.isdir(g_dir_artifacts):
         log(
