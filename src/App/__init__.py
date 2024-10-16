@@ -1,3 +1,5 @@
+from os import path
+
 from flask import Flask
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
@@ -40,6 +42,12 @@ def create_app():
             else:
                 app.config[key] = val
 
+    if not path.isdir(app.config[constants.KEY_CONFIG_DIR_ARTIFACTS]):
+        print(
+            f"Directory '{app.config[constants.KEY_CONFIG_DIR_ARTIFACTS]}' does not exist. Exiting."
+        )
+        exit(4)
+
     bcrypt.init_app(app)
     db.init_app(app)
     login_manager.init_app(app)
@@ -47,6 +55,8 @@ def create_app():
     constants.runtime_context.init_app(app)
 
     from App import utils
+
+    app.jinja_env.globals.update(get_app_name=utils.get_app_name)
 
     app.jinja_env.filters["datetime_to_display"] = (
         utils.maybe_datetime_to_display_string

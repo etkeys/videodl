@@ -9,7 +9,7 @@ class Config:
     APP_DB_CATALOG = environ.get("VIDEODL_DB_CATALOG")
     APP_DB_PASSWORD = environ.get("VIDEODL_DB_PASSWORD")
     APP_DB_USER = environ.get("VIDEODL_DB_USER")
-    APP_DEBUG_MODE = environ.get("VIDEODL_APP_DEBUG_MODE")
+    APP_DEBUG_MODE = environ.get("FLASK_DEBUG")
     APP_DIR_ARTIFACTS = environ.get("VIDEODL_DIR_ARTIFACTS")
     APP_DIR_LOGS = environ.get("VIDEODL_DIR_LOGS")
     APP_ENVIRONMENT = environ.get("VIDEODL_ENVIRONMENT")

@@ -1,9 +1,9 @@
 
 MVP:
-- App: SystemD service
 - Worker: Actually do download
 - Test site configuration
     - postgres port will need to be different to not collide with production
+    - App port will need to be different to not collide with production
 - Production site configuration
 
 After MVP:
