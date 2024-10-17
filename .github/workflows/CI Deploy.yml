@@ -39,9 +39,11 @@ jobs:
           echo ${COMMIT}
 
       - name: Assembly true app version - testing
+        if: ${{ env.BRANCH_TYPE == 'testing' }}
         run: echo "APP_VERSION=${APP_VERSION}-${BUILD_NUMBER}.prerelease+${COMMIT}"
 
       - name: Assembly true app version - release
+        if: ${{ env.BRANCH_TYPE == 'release' }}
         run: echo "APP_VERSION=${APP_VERSION}-${BUILD_NUMBER}+${COMMIT}" >> $GITHUB_ENV
 
       - name: Print true app version
