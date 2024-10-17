@@ -3,48 +3,46 @@ name: CI Deploy
 on:
   push:
     branches:
-      - 'release/*'
       - 'testing/*'
+  release:
+    types: [released]
+
+permissions:
+  contents: read
+
+env:
+  BASE_APP_VERSION: ${{ github.event_name == 'release' && github.event.release.tag_name || github.ref_name}}
+  BUILD_NUMBER: ${{ github.run_number }}
+  BUILD_TYPE: ${{ github.event_name == 'release' && 'release' || 'testing' }}
 
 jobs:
   deploy:
     name: Deploy
     runs-on: ubuntu-22.04
     steps:
-      - name: Checkout
-        uses: actions/checkout@v1
-
-      - name: Store version number
+      - name: Store other build variables
         run: |
-          echo ${{ github.ref }} | awk '{split($0, a, "/"); print "APP_VERSION="a[4]}' >> $GITHUB_ENV
-          echo ${{ github.run_number }} | awk '{printf("%s%04d\n", "BUILD_NUMBER=", $0)}' >> $GITHUB_ENV
-          echo ${{ github.sha}} | awk '{printf("%s%s\n", "COMMIT=", substr($0, 1, 10))}' >> $GITHUB_ENV
-          echo "BUILD_DATE=$(date +"%D %r")" >> $GITHUB_ENV
-
-
-      - name: Store testing branch type indicator
-        if: ${{ startsWith(github.ref, 'refs/heads/testing/') }}
-        run: echo "BRANCH_TYPE=testing" >> $GITHUB_ENV
-
-      - name: Store release branch type indicator
-        if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
-        run: echo "BRANCH_TYPE=release" >> $GITHUB_ENV
+          echo "BUILD_DATE=$(TZ="America/New_York" date +"%F %r")" >> $GITHUB_ENV
+          echo ${{ github.sha }} | awk '{printf("%s%s\n", "COMMIT=", substr($0, 1, 10))}' >> $GITHUB_ENV
 
       - name: print things
         run: |
-          echo ${APP_VERSION}
-          echo ${BRANCH_TYPE}
+          echo ${BASE_APP_VERSION}
           echo ${BUILD_DATE}
           echo ${BUILD_NUMBER}
+          echo ${BUILD_TYPE}
           echo ${COMMIT}
 
-      - name: Assembly true app version - testing
-        if: ${{ env.BRANCH_TYPE == 'testing' }}
-        run: echo "APP_VERSION=${APP_VERSION}-${BUILD_NUMBER}.prerelease+${COMMIT}"
+      # - name: Assembly true app version - testing
+      #   if: ${{ env.BRANCH_TYPE == 'testing' }}
+      #   run: echo "APP_VERSION=${APP_VERSION}-${BUILD_NUMBER}.prerelease+${COMMIT}" >> $GITHUB_ENV
 
-      - name: Assembly true app version - release
-        if: ${{ env.BRANCH_TYPE == 'release' }}
-        run: echo "APP_VERSION=${APP_VERSION}-${BUILD_NUMBER}+${COMMIT}" >> $GITHUB_ENV
+      # - name: Assembly true app version - release
+      #   if: ${{ env.BRANCH_TYPE == 'release' }}
+      #   run: echo "APP_VERSION=${APP_VERSION}-${BUILD_NUMBER}+${COMMIT}" >> $GITHUB_ENV
 
-      - name: Print true app version
-        run: echo ${APP_VERSION}
+      # - name: Print true app version
+      #   run: echo ${APP_VERSION}
+
+      # - name: Checkout
+      #   uses: actions/checkout@v1
