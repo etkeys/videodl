@@ -17,8 +17,8 @@ jobs:
       - name: Store version number
         run: |
           echo ${{ github.ref }} | awk '{split($0, a, "/"); print "APP_VERSION="a[4]}' >> $GITHUB_ENV
-          echo ${{ github.run_number }} | awk '{printf("%s%04d", "BUILD_NUMBER=", $0)}' >> $GITHUB_ENV
-          echo ${{ github.sha}} | awk '{printf("%s%s", "COMMIT=", substr($0, 1, 10))}' >> $GITHUB_ENV
+          echo ${{ github.run_number }} | awk '{printf("%s%04d\n", "BUILD_NUMBER=", $0)}' >> $GITHUB_ENV
+          echo ${{ github.sha}} | awk '{printf("%s%s\n", "COMMIT=", substr($0, 1, 10))}' >> $GITHUB_ENV
 
       - name: Store testing branch type indicator
         if: ${{ startsWith(github.ref, 'refs/heads/testing/') }}
