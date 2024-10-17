@@ -19,6 +19,8 @@ jobs:
           echo ${{ github.ref }} | awk '{split($0, a, "/"); print "APP_VERSION="a[4]}' >> $GITHUB_ENV
           echo ${{ github.run_number }} | awk '{printf("%s%04d\n", "BUILD_NUMBER=", $0)}' >> $GITHUB_ENV
           echo ${{ github.sha}} | awk '{printf("%s%s\n", "COMMIT=", substr($0, 1, 10))}' >> $GITHUB_ENV
+          echo "BUILD_DATE=$(date +"%D %r")" >> $GITHUB_ENV
+
 
       - name: Store testing branch type indicator
         if: ${{ startsWith(github.ref, 'refs/heads/testing/') }}
@@ -32,5 +34,15 @@ jobs:
         run: |
           echo ${APP_VERSION}
           echo ${BRANCH_TYPE}
+          echo ${BUILD_DATE}
           echo ${BUILD_NUMBER}
           echo ${COMMIT}
+
+      - name: Assembly true app version - testing
+        run: echo "APP_VERSION=${APP_VERSION}-${BUILD_NUMBER}.prerelease+${COMMIT}"
+
+      - name: Assembly true app version - release
+        run: echo "APP_VERSION=${APP_VERSION}-${BUILD_NUMBER}+${COMMIT}" >> $GITHUB_ENV
+
+      - name: Print true app version
+        run: echo ${APP_VERSION}
