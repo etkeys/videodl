@@ -1,0 +1,32 @@
+name: CI Deploy
+
+on:
+  push:
+    branches:
+      - 'release/*'
+      - 'testing/*'
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v1
+
+      - name: Store testing branch type indicator
+        if: ${{ startsWith(github.ref, 'refs/heads/testing/') }}
+        run: echo "BRANCH_TYPE=testing" >> $GITHUB_ENV
+
+      - name: Store release branch type indicator
+        if: ${{ startsWith(github.ref, 'refs/heads/release/') }}
+        run: echo "BRANCH_TYPE=release" >> $GITHUB_ENV
+
+      - name: Store version number
+        run: echo ${GITHUB_REF} | awk '{split($0, a, "/"); print "APP_VERSION="a[4]}' >> $GITHUB_ENV
+
+      - name: print things
+        run: |
+          echo ${BRANCH_TYPE}
+          echo ${APP_VERSION}
+
