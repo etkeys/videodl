@@ -80,3 +80,7 @@ jobs:
           mv --verbose videodl_worker.service videodl_worker-testing.service
           mv --verbose videodl.service videodl-testing.service
           ls -la
+
+      - name: Prune systemd files - release
+        if: ${{ env.BUILD_TYPE == 'release' }}
+        run: echo "Nothing to do. This action is just to have a sibling to 'testing'."
