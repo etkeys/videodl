@@ -102,3 +102,12 @@ jobs:
           rm --verbose .env-release
           mv --verbose .env-testing .env
           ${{ env.LS_CMD }}
+
+      - name: Prune app files - release
+        if: ${{ env.BUILD_TYPE == 'release' }}
+        run: |
+          cd src
+          ${{ env.LS_CMD }}
+          rm --verbose .env-testing
+          mv --verbose .env-release .env
+          ${{ env.LS_CMD }}
