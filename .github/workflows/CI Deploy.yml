@@ -71,3 +71,12 @@ jobs:
           mv --verbose .env-release .env
           mv --verbose videodl_postgres.env-release videodl_postgres.env
           ls -la
+
+      - name: Prune systemd files - testing
+        if: ${{ env.BUILD_TYPE == 'testing' }}
+        run: |
+          cd systemd
+          ls -la
+          mv --verbose videodl_worker.service videodl_worker-testing.service
+          mv --verbose videodl.service videodl-testing.service
+          ls -la
