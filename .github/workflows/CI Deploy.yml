@@ -84,3 +84,20 @@ jobs:
       - name: Prune systemd files - release
         if: ${{ env.BUILD_TYPE == 'release' }}
         run: echo "Nothing to do. This action is just to have a sibling to 'testing'."
+
+      - name: Prune app files
+        run: |
+          cd src
+          ls -la
+          rm --verbose init_db_dev.sh
+          rm --verbose seed_db_dev.py
+          ls -la
+
+      - name: Prune app files - testing
+        if: ${{ env.BUILD_TYPE == 'testing' }}
+        run: |
+          cd src
+          ls -la
+          rm --verbose .env-release
+          mv --verbose .env-testing .env
+          ls -la
