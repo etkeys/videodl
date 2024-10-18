@@ -37,6 +37,15 @@ jobs:
           echo ${BUILD_TYPE}
           echo ${COMMIT}
 
+      - name: Assemble app version
+        run: |
+          APP_VERSION="${BASE_APP_VERSION}-${BUILD_NUMBER}"
+          if [ "${BUILD_TYPE}" == 'testing' ]; then
+              APP_VERSION="${APP_VERSION}.prerelease"
+          fi
+          APP_VERSION="${APP_VERSION}+${COMMIT}"
+          echo "APP_VERSION=${APP_VERSION}" >> $GITHUB_ENV
+
       # - name: Assembly true app version - testing
       #   if: ${{ env.BRANCH_TYPE == 'testing' }}
       #   run: echo "APP_VERSION=${APP_VERSION}-${BUILD_NUMBER}.prerelease+${COMMIT}" >> $GITHUB_ENV
@@ -45,8 +54,8 @@ jobs:
       #   if: ${{ env.BRANCH_TYPE == 'release' }}
       #   run: echo "APP_VERSION=${APP_VERSION}-${BUILD_NUMBER}+${COMMIT}" >> $GITHUB_ENV
 
-      # - name: Print true app version
-      #   run: echo ${APP_VERSION}
+      - name: Print true app version
+        run: echo "${{ env.APP_VERSION }}"
 
       # - name: Checkout
       #   uses: actions/checkout@v1
