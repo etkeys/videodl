@@ -111,3 +111,15 @@ jobs:
           rm --verbose .env-testing
           mv --verbose .env-release .env
           ${{ env.LS_CMD }}
+
+      - name: Inject version info
+        run: |
+          cd src/App/static
+          sed -i 's/{{ last_updated_string }}/${{ env.BUILD_DATE }}/' about.md
+          sed -i 's/{{ version_string }}/${{ env.APP_VERSION }}/' about.md
+
+      - name: Package files
+        run: |
+          tar --create --file "${{ env.APP_VERSION }}.tar.gz" --auto-compress --verbose postgres src systemd
+          ${{ env.LS_CMD}} *.tar.gz
+
