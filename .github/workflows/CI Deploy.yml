@@ -29,13 +29,13 @@ jobs:
           echo ${{ github.run_number }} | awk '{printf("%s%04d\n", "BUILD_NUMBER=", $0)}' >> $GITHUB_ENV
           echo ${{ github.sha }} | awk '{printf("%s%s\n", "COMMIT=", substr($0, 1, 10))}' >> $GITHUB_ENV
 
-      - name: print things
-        run: |
-          echo ${BASE_APP_VERSION}
-          echo ${BUILD_DATE}
-          echo ${BUILD_NUMBER}
-          echo ${BUILD_TYPE}
-          echo ${COMMIT}
+      # - name: print things
+      #   run: |
+      #     echo ${BASE_APP_VERSION}
+      #     echo ${BUILD_DATE}
+      #     echo ${BUILD_NUMBER}
+      #     echo ${BUILD_TYPE}
+      #     echo ${COMMIT}
 
       - name: Assemble app version
         run: |
@@ -46,16 +46,18 @@ jobs:
           APP_VERSION="${APP_VERSION}+${COMMIT}"
           echo "APP_VERSION=${APP_VERSION}" >> $GITHUB_ENV
 
-      # - name: Assembly true app version - testing
-      #   if: ${{ env.BRANCH_TYPE == 'testing' }}
-      #   run: echo "APP_VERSION=${APP_VERSION}-${BUILD_NUMBER}.prerelease+${COMMIT}" >> $GITHUB_ENV
+      # - name: Print true app version
+      #   run: echo "${{ env.APP_VERSION }}"
 
-      # - name: Assembly true app version - release
-      #   if: ${{ env.BRANCH_TYPE == 'release' }}
-      #   run: echo "APP_VERSION=${APP_VERSION}-${BUILD_NUMBER}+${COMMIT}" >> $GITHUB_ENV
+      - name: Checkout
+        uses: actions/checkout@v1
 
-      - name: Print true app version
-        run: echo "${{ env.APP_VERSION }}"
-
-      # - name: Checkout
-      #   uses: actions/checkout@v1
+      - name: Prune docker files - testing
+        if: ${{ env.BUILD_TYPE == 'testing' }}
+        run: |
+          cd postgres
+          ls -la
+          rm .env-release videodl_postgres.env-release
+          mv .env-testing .env
+          mv videodl_postgres.env-testing videodl_postgres.env
+          ls -la
