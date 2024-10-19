@@ -82,9 +82,9 @@ jobs:
       - name: Substitute vars in systemd files
         run: |
           cd systemd
-          sed -i 's/{{ REMOTE_APP_DIR }}/${{ vars.REMOTE_APP_DIR }}/' videodl_worker.service
-          sed -i 's/{{ REMOTE_APP_DIR }}/${{ vars.REMOTE_APP_DIR }}/' videodl.service
-          sed -i 's/{{ REMOTE_WSGI_BIND_ADDRESS }}/${{ vars.REMOTE_WSGI_BIND_ADDRESS }}/' videodl.service
+          sed -i 's;{{ REMOTE_APP_DIR }};${{ vars.REMOTE_APP_DIR }};g' videodl_worker.service
+          sed -i 's;{{ REMOTE_APP_DIR }};${{ vars.REMOTE_APP_DIR }};g' videodl.service
+          sed -i 's;{{ REMOTE_WSGI_BIND_ADDRESS }};${{ vars.REMOTE_WSGI_BIND_ADDRESS }};' videodl.service
 
       - name: Rename systemd files
         run: |
