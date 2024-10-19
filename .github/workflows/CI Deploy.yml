@@ -119,8 +119,8 @@ jobs:
         uses: burnett01/rsync-deployments@7.0.1
         with:
           switches: -iv
-          path: ${{ env.ZIP_PACKAGE_NAME }}.tar.gz
+          path: ${{ env.ZIP_PACKAGE_NAME }}
           remote_path: ${{ vars.DEPLOY_REMOTE_PATH }}
-          remote_host: ${{ secrets.DEPLOY_REMOST_HOST }}
+          remote_host: ${{ secrets.DEPLOY_REMOTE_HOST }}
           remote_user: github
           remote_key: ${{ secrets.DEPLOY_KEY }}
