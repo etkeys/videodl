@@ -2,8 +2,7 @@
 Description=Runs the background worker for Video DL application.
 
 [Service]
-# When deploying change {{ VIDEODL_DIR }} to where the app files were placed
-ExecStart={{ VIDEODL_DIR }}/.venv/bin/python3 {{ VIDEODL_DIR }}/src/worker_run.py
+ExecStart={{ REMOTE_APP_DIR }}/.venv/bin/python3 {{ REMOTE_APP_DIR }}/src/worker_run.py
 Environment=PYTHONUNBUFFERED=1
 
 [Install]
