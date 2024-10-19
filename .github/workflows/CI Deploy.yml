@@ -23,7 +23,6 @@ jobs:
       app-version: ${{ steps.assembly-app-version.outputs.APP_VERSION }}
       build-date: ${{ steps.other-build-variables.outputs.BUILD_DATE }}
     steps:
-
       - name: Store other build variables
         id: other-build-variables
         run: |
@@ -45,6 +44,17 @@ jobs:
           APP_VERSION="${APP_VERSION}+${COMMIT}"
           echo "APP_VERSION=${APP_VERSION}" >> $GITHUB_OUTPUT
 
+  deploy-testing:
+    name: Deploy to Testing environment
+    if: ${{ startsWith(github.ref_name, 'testing/') }}
+    runs-on: ubuntu-22.04
+    needs: [deploy-core]
+    environment: Testing
+    env:
+      APP_VERSION: ${{ needs.deploy-core.outputs.app-version}}
+      BUILD_DATE: ${{ needs.deploy-core.outputs.build-date }}
+      ZIP_PACKAGE_NAME: ${{ needs.deploy-core.outputs.app-version }}.tar.gz
+    steps:
       - name: Checkout
         uses: actions/checkout@v1
 
@@ -60,17 +70,6 @@ jobs:
           source .venv/bin/activate
           pip install -r requirements.txt
 
-  deploy-testing:
-    name: Deploy to Testing environment
-    if: ${{ startsWith(github.ref_name, 'testing/') }}
-    runs-on: ubuntu-22.04
-    needs: [deploy-core]
-    environment: Testing
-    env:
-      APP_VERSION: ${{ needs.deploy-core.outputs.app-version}}
-      BUILD_DATE: ${{ needs.deploy-core.outputs.build-date }}
-      ZIP_PACKAGE_NAME: ${{ needs.deploy-core.outputs.app-version }}.tar.gz
-    steps:
       - name: Prune docker files
         run: |
           cd postgres
