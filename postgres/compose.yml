@@ -6,7 +6,7 @@
 services:
     db:
         image: postgres:16.4
-        container_name: ${CONTAINER_NAME}
+        container_name: videodl-db
         restart: unless-stopped
         env_file:
             - ./videodl_postgres.env
