@@ -66,8 +66,8 @@ jobs:
       - name: Setup python virtual environment
         run: |
           pip install --upgrade pip
-          python3.10 -m venv .venv
-          source .venv/bin/activate
+          python3.10 -m venv venv
+          source venv/bin/activate
           pip install -r requirements.txt
 
       - name: Configure docker files
@@ -111,7 +111,7 @@ jobs:
 
       - name: Package files
         run: |
-          tar --create --file "${{ env.ZIP_PACKAGE_NAME }}" --auto-compress --verbose .venv postgres src systemd
+          tar --create --file "${{ env.ZIP_PACKAGE_NAME }}" --auto-compress --verbose venv postgres src systemd
           ${{ env.LS_CMD}} *.tar.gz
 
       - name: rsync deployment

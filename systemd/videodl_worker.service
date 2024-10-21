@@ -2,7 +2,7 @@
 Description=Runs the background worker for Video DL application.
 
 [Service]
-ExecStart={{ REMOTE_APP_DIR }}/.venv/bin/python3 {{ REMOTE_APP_DIR }}/src/worker_run.py
+ExecStart={{ REMOTE_APP_DIR }}/venv/bin/python3 {{ REMOTE_APP_DIR }}/src/worker_run.py
 Environment=PYTHONUNBUFFERED=1
 
 [Install]
