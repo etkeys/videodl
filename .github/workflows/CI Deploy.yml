@@ -99,7 +99,7 @@ jobs:
 
       - name: Package files
         run: |
-          tar --create --file "${{ env.ZIP_PACKAGE_NAME }}" --auto-compress --verbose venv postgres src systemd
+          tar --create --file "${{ env.ZIP_PACKAGE_NAME }}" --auto-compress --verbose postgres src systemd requirements.txt
           ${{ env.LS_CMD}} *.tar.gz
 
       - name: rsync deployment
