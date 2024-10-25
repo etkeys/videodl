@@ -23,7 +23,7 @@ def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
 
-    app.debug = bool(app.config[constants.KEY_CONFIG_DEBUG_MODE])
+    app.debug = bool(int(app.config[constants.KEY_CONFIG_DEBUG_MODE]))
     app.name = app.config[constants.KEY_CONFIG_APP_NAME]
 
     db_address = app.config[constants.KEY_CONFIG_DB_ADDRESS]
