@@ -7,7 +7,7 @@ from App.forms.validators import UrlExists
 class DownloadItemDetailsForm(FlaskForm):
     title = StringField("Title", validators=[DataRequired()])
     audio_only = BooleanField("Audio Only", default=True)
-    url = StringField("URL", validators=[DataRequired(), UrlExists()])
+    url = StringField("URL", validators=[DataRequired()])
 
     submit = SubmitField("Submit", name="Execute")
 
