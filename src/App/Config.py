@@ -12,6 +12,7 @@ class Config:
     APP_DEBUG_MODE = environ.get("FLASK_DEBUG")
     APP_DIR_ARTIFACTS = environ.get("VIDEODL_DIR_ARTIFACTS")
     APP_DIR_LOGS = environ.get("VIDEODL_DIR_LOGS")
+    APP_DOWNLOADER_APP_DIR = environ.get("VIDEODL_DOWNLOADER_APP_DIR")
     APP_ENVIRONMENT = environ.get("VIDEODL_ENVIRONMENT")
     APP_NAME = environ.get("VIDEODL_APP_NAME")
     SECRET_KEY = environ.get("SECRET_KEY")

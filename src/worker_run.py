@@ -22,6 +22,7 @@ from App.utils import create_safe_file_name, datetime_now
 g_dir_artifacts = None
 g_dir_logs = None
 g_simulate = False
+g_downloader_app = "yt-dlp"
 
 
 def get_arg_parser():
@@ -89,7 +90,7 @@ def do_download(
             if g_simulate:
                 run_args = ["dd", "if=/dev/urandom", f"of={download_file}", "bs=1KB", "count=1"]
             else:
-                run_args = ["yt-dlp", "--verbose", "--restrict-filename", "--paths", temp_dir]
+                run_args = [g_downloader_app, "--verbose", "--restrict-filename", "--paths", temp_dir]
                 if item.audio_only:
                     run_args += ["--extract-audio", "--audio-format", "mp3"]
                 run_args += [item.url, "--exec", f"cp {{}} {download_file}"]
@@ -162,6 +163,11 @@ if __name__ == "__main__":
         g_simulate = not args.simulate
     else:
         g_simulate = args.simulate
+
+    if app.config[constants.KEY_CONFIG_DOWNLOADER_APP_DIR]:
+        g_downloader_app = path.join(
+            app.config[constants.KEY_CONFIG_DOWNLOADER_APP_DIR],
+            g_downloader_app)
 
     if not path.isdir(g_dir_artifacts):
         log(
