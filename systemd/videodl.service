@@ -2,11 +2,9 @@
 Description=Runs the WSGI server for Video DL application.
 
 [Service]
-# When deploying, change {{ VIDEODL_DIR }} to where the app files were placed
-# When deploying, create override.conf to set {{ BIND_ADDRESS }},
-#       REMEMBER: Test site and production site need different addresses
-WorkingDirectory=/home/erik/repos/videodl/src
-ExecStart=/home/erik/repos/videodl/.venv/bin/gunicorn --workers 3 --bind {{ BIND_ADDR }} app:app
+User=videodl
+WorkingDirectory={{ REMOTE_APP_DIR }}/src
+ExecStart={{ REMOTE_APP_DIR }}/venv/bin/gunicorn --workers 3 --bind {{ BIND_ADDR }} app:app
 Environment=PYTHONUNBUFFERED=1
 
 [Install]
