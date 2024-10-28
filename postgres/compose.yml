@@ -5,9 +5,9 @@ services:
         container_name: videodl-db
         restart: unless-stopped
         env_file:
-            - ./videodl_postgres.dev.env
+            - ./videodl_postgres.env
         ports:
-            - 127.0.0.1:18182:5432
+            - 127.0.0.1:${HOST_PORT}:5432
         volumes:
             - videodl-db-data:/var/lib/postgresql/data
 
