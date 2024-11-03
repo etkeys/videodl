@@ -1,10 +1,8 @@
 name: For LAN Deploy
 
 on:
-  push:
-    branches:
-      - 'main'
-  workflow_dispatch:
+  release:
+    types: [released]
 
 permissions:
   contents: read
@@ -25,11 +23,12 @@ jobs:
         run: |
           echo ${{ github.run_number }} | awk '{printf("%s%04d\n", "BUILD_NUMBER=", $0)}' >> $GITHUB_ENV
           echo ${{ github.sha }} | awk '{printf("%s%s\n", "COMMIT=", substr($0, 1, 10))}' >> $GITHUB_ENV
+          echo "TAG_NAME=$(echo ${{ github.ref }} | cut -d / -f 3)" >> $GITHUB_ENV
 
       - name: Assemble app version
         id: assemble-app-version
         run: |
-          APP_VERSION="${BUILD_NUMBER}+${COMMIT}+lan-deployment"
+          APP_VERSION="${TAG_NAME}-build_${BUILD_NUMBER}+${COMMIT}+lan-deployment"
           echo "APP_VERSION=${APP_VERSION}" >> $GITHUB_OUTPUT
           echo "BUILD_DATE=$(TZ="America/New_York" date +"%F %r")" >> $GITHUB_OUTPUT
           echo "TAR_NAME=videodl.${APP_VERSION}.tar.gz" >> $GITHUB_OUTPUT
