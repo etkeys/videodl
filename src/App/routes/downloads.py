@@ -75,6 +75,7 @@ def add_failed_item_to_todo(download_set_id, item_id):
             item.audio_only,
             item.url,
             item.file_name,
+            item.artist,
             item.id,
         )
 
@@ -99,6 +100,7 @@ def add_all_failed_items_to_todo(download_set_id):
                 item.audio_only,
                 item.url,
                 item.file_name,
+                item.artist,
                 item.id,
             )
 

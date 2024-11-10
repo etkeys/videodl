@@ -5,12 +5,17 @@ from uuid import uuid4, UUID
 from App import constants
 
 
-def create_safe_file_name(title: str, audio_only: bool) -> str:
+def create_safe_file_name(
+    title: str, audio_only: bool, artist: str | None = None
+) -> str:
     ext = ".mp3" if audio_only else ".mp4"
+
+    artist = None if artist is None or artist.strip() == "" else artist
+    new_title = f"{artist}-{title}" if artist is not None else title
 
     # TODO this is a niavie way to do this, need to find a better way.
     new_title = (
-        title.replace(" ", "_")
+        new_title.replace(" ", "_")
         .replace("'", "")
         .replace('"', "")
         .replace("&", "and")
@@ -79,8 +84,9 @@ def get_app_name():
 def get_app_logs_dir():
     return constants.runtime_context[constants.KEY_CONFIG_DIR_LOGS]
 
+
 def is_environment_development():
-    return constants.runtime_context[constants.KEY_CONFIG_ENVIRONMENT] == 'development'
+    return constants.runtime_context[constants.KEY_CONFIG_ENVIRONMENT] == "development"
 
 
 # Taken from stackoverflow (by Martin Thoma)

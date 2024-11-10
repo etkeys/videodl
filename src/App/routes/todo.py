@@ -14,13 +14,16 @@ def add_item():
     form = DownloadItemDetailsForm()
     if form.validate_on_submit():
         try:
-            file_name = create_safe_file_name(form.title.data, form.audio_only.data)
+            file_name = create_safe_file_name(
+                form.title.data, form.audio_only.data, form.artist.data
+            )
             repo.add_download_item(
                 current_user.id,
                 form.title.data,
                 form.audio_only.data,
                 form.url.data,
                 file_name,
+                form.artist.data,
             )
             flash(f"Item added successfully.", category="success")
             return redirect(url_for("todo.display_todo"))
@@ -48,6 +51,7 @@ def edit_item(id):
         abort(404, description=f"Could not find item with Id of '{id}'.")
 
     form = DownloadItemDetailsForm()
+    form.artist.data = item.artist
     form.title.data = item.title
     form.audio_only.data = item.audio_only
     form.url.data = item.url
@@ -65,7 +69,9 @@ def edit_item_submit(id):
             abort(404, description=f"Could not find item with Id of '{id}'.")
 
         try:
-            file_name = create_safe_file_name(form.title.data, form.audio_only.data)
+            file_name = create_safe_file_name(
+                form.title.data, form.audio_only.data, form.artist.data
+            )
             repo.update_item(
                 current_user.id,
                 id,
@@ -73,6 +79,7 @@ def edit_item_submit(id):
                 audio_only=form.audio_only.data,
                 url=form.url.data,
                 file_name=file_name,
+                artist=form.artist.data,
             )
             flash("Item updated successfully.", category="success")
             return redirect(url_for("todo.display_todo"))
@@ -113,6 +120,7 @@ def confirm_delete_item(id):
         abort(404, description=f"Could not find item with Id of '{id}'.")
 
     form = DownloadItemDetailsForm(True)
+    form.artist = item.artist
     form.title = item.title
     form.audio_only = item.audio_only
     form.url = item.url

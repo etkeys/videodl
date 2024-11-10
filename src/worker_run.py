@@ -8,7 +8,7 @@ from tempfile import TemporaryDirectory
 from time import sleep
 from traceback import format_exc
 
-from App import constants, create_app 
+from App import constants, create_app
 from App.models import (
     DownloadItem,
     DownloadItemStatus,
@@ -47,7 +47,7 @@ def get_arg_parser():
     parser.add_argument(
         "--simulate",
         action="store_true",
-        help="Toggles between actually performing download or creating fake files. In development mode, passing this flag will have the opposite effect."
+        help="Toggles between actually performing download or creating fake files. In development mode, passing this flag will have the opposite effect.",
     )
 
     return parser
@@ -75,12 +75,13 @@ def do_download(
     try:
         if repo.any_completed_items_with_url(item.download_set_id, item.url):
             raise RuntimeError("An already completed item has the same URL.")
-        if repo.any_completed_items_with_file_name(item.download_set_id, item.file_name):
+        if repo.any_completed_items_with_file_name(
+            item.download_set_id, item.file_name
+        ):
             raise RuntimeError("An already completed item has the same file name.")
 
         with TemporaryDirectory() as temp_dir:
-            file_name = create_safe_file_name(item.title, item.audio_only)
-            download_file = path.join(temp_dir, file_name)
+            download_file = path.join(temp_dir, item.file_name)
 
             log("Executing download.", LogLevel.INFOLOW, log_id=item.id)
 
@@ -88,9 +89,21 @@ def do_download(
                 raise Exception("Random fail event.")
 
             if g_simulate:
-                run_args = ["dd", "if=/dev/urandom", f"of={download_file}", "bs=1KB", "count=1"]
+                run_args = [
+                    "dd",
+                    "if=/dev/urandom",
+                    f"of={download_file}",
+                    "bs=1KB",
+                    "count=1",
+                ]
             else:
-                run_args = [g_downloader_app, "--verbose", "--restrict-filename", "--paths", temp_dir]
+                run_args = [
+                    g_downloader_app,
+                    "--verbose",
+                    "--restrict-filename",
+                    "--paths",
+                    temp_dir,
+                ]
                 if item.audio_only:
                     run_args += ["--extract-audio", "--audio-format", "mp3"]
                 run_args += [item.url, "--exec", f"cp {{}} {download_file}"]
@@ -111,7 +124,11 @@ def do_download(
                 repo.update_download_item_status(item, DownloadItemStatus.FAILED)
                 return
 
-            log("Waiting 2 seconds for file system to catch up.", LogLevel.DEBUG, log_id=item.id)
+            log(
+                "Waiting 2 seconds for file system to catch up.",
+                LogLevel.DEBUG,
+                log_id=item.id,
+            )
             sleep(2)
 
             ds_art_dir = path.join(g_dir_artifacts, item.download_set_id)
@@ -166,8 +183,8 @@ if __name__ == "__main__":
 
     if app.config[constants.KEY_CONFIG_DOWNLOADER_APP_DIR]:
         g_downloader_app = path.join(
-            app.config[constants.KEY_CONFIG_DOWNLOADER_APP_DIR],
-            g_downloader_app)
+            app.config[constants.KEY_CONFIG_DOWNLOADER_APP_DIR], g_downloader_app
+        )
 
     if not path.isdir(g_dir_artifacts):
         log(

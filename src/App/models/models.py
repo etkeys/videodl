@@ -146,7 +146,8 @@ class DownloadItem(db.Model):
     status = mapped_column(
         SqlEnum(DownloadItemStatus), nullable=False, default=DownloadItemStatus.TODO
     )
-    title = mapped_column(String(255), nullable=False)
+    artist = mapped_column(String(50))
+    title = mapped_column(String(100), nullable=False)
     audio_only = mapped_column(Boolean(), nullable=False, default=False)
     url = mapped_column(String(255), nullable=False)
     file_name = mapped_column(String(255), nullable=False)
@@ -165,13 +166,14 @@ class DownloadItem(db.Model):
     download_set = relationship("DownloadSet", back_populates="items")
 
     def __repr__(self):
-        return f"DownloadItem('{self.id}', '{self.url}', '{self.title}', audio_only={self.audio_only})"
+        return f"DownloadItem('{self.id}', '{self.url}', '{self.artist}', '{self.title}', audio_only={self.audio_only})"
 
     def belongs_to_set(self, download_set_id):
         return self.download_set_id == download_set_id
 
     def get_properties_for_display(self, include_admin_props: bool | None = False):
         ret = [
+            ("Author/Artist", "" if self.artist is None else self.artist),
             ("Title", self.title),
             ("Audio Only", "Yes" if self.audio_only else "No"),
             ("URL", self.url),
