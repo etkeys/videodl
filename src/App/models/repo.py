@@ -17,6 +17,7 @@ class Repository(object):
         audio_only: bool,
         url: str,
         file_name: str,
+        artist: str | None = None,
         copy_from_id: str | None = None,
         commit_on_add: bool = True,
     ):
@@ -43,6 +44,8 @@ class Repository(object):
             file_name=file_name,
         )
 
+        if artist is not None and artist.strip() != "":
+            item.artist = artist
         if copy_from_id is not None:
             item.copied_from_id = copy_from_id
 
@@ -89,6 +92,7 @@ class Repository(object):
                 item.audio_only,
                 item.url,
                 item.file_name,
+                item.artist,
                 item.id,
                 False,
             )
@@ -298,6 +302,10 @@ class Repository(object):
             item.url = str(kwargs["url"])
         if "file_name" in kwargs:
             item.file_name = str(kwargs["file_name"])
+        if "artist" in kwargs:
+            artist = kwargs["artist"]
+            if artist is not None and artist.strip() != "":
+                item.artist = artist
 
         db.session.commit()
 

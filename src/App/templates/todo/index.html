@@ -21,18 +21,18 @@
                         <td style="vertical-align: middle;">{{ loop.index }}</td>
                         <td style="vertical-align: middle;">
                             <table class="item-details">
-                                <tr>
-                                    <td class="item-details-label">Title</td>
-                                    <td>{{ item.title }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="item-details-label">Audio Only</td>
-                                    <td>{{ item.audio_only }}</td>
-                                </tr>
-                                <tr>
-                                    <td class="item-details-label">URL</td>
-                                    <td class="item-details-url"><a target="_blank" href="{{ item.url }}" >{{ item.url }}</a></td>
-                                </tr>
+                                {% for prop_name, prop_val in item.get_properties_for_display() %}
+                                    {% if prop_name != "Status" %}
+                                        <tr>
+                                            <td class="item-details-label">{{ prop_name }}</td>
+                                            {% if prop_name == "URL" %}
+                                                <td class="item-details-url"><a target="_blank" href="{{ prop_val }}">{{ prop_val }}</a></td>
+                                            {% else %}
+                                                <td>{{ prop_val }}</td>
+                                            {% endif %}
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
                             </table>
                         </td>
                         <td style="vertical-align: middle;">

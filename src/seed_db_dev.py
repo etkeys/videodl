@@ -81,7 +81,6 @@ if __name__ == "__main__":
             ),
             DownloadItem(
                 download_set_id="ecfab23e-5658-43f4-96a4-edb3f644041d",
-                # url="https://bar.com/2",
                 url="https://bar.com/1",
                 title="Download set 2 #2",
                 added_datetime=now_time - timedelta(days=1, hours=20, minutes=43),
@@ -106,16 +105,19 @@ if __name__ == "__main__":
                 url="https://example.com/1",
                 title="Video #1",
                 audio_only=True,
+                artist="foo",
             ),
             DownloadItem(
                 download_set_id="c0284624-df1c-495b-b41d-3ca52f5af4e0",
                 url="https://example.com/2",
                 title="Video #2",
+                artist="bar",
             ),
             DownloadItem(
                 download_set_id="c0284624-df1c-495b-b41d-3ca52f5af4e0",
                 url="https://example.com/3",
                 title="Video #3",
+                artist="baz",
             ),
         ]
 
@@ -123,7 +125,9 @@ if __name__ == "__main__":
         db.session.add_all(download_sets)
 
         for item in download_items:
-            item.file_name = create_safe_file_name(item.title, item.audio_only)
+            item.file_name = create_safe_file_name(
+                item.title, item.audio_only, item.artist
+            )
         db.session.add_all(download_items)
 
         db.session.commit()

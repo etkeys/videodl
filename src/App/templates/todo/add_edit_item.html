@@ -22,7 +22,22 @@
                             <td style="width: 100%;">&nbsp;</td>
                         </tr>
                         <tr>
-                            <td class="item-details-label">{{ form.title.label }}<sup>1</sup></td>
+                            <td class="item-details-label">{{ form.artist.label }}</td>
+                            <td>
+                                {% if form.artist.errors %}
+                                    {{ form.artist(class=class_invalid_input) }}
+                                    <div class="{{ class_invalid_message }}">
+                                        {% for error in form.artist.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% else %}
+                                    {{ form.artist(class=class_input) }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="item-details-label">{{ form.title.label }}</td>
                             <td>
                                 {% if form.title.errors %}
                                     {{ form.title(class=class_invalid_input) }}

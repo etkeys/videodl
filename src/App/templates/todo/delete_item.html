@@ -7,20 +7,18 @@
     <form method="POST" action="" class="w3-container">
         {{ form.hidden_tag() }}
         <table class="item-details">
-            <tr>
-                <td class="item-details-label">Title</td>
-                <td>{{ form.title }}</td>
-            </tr>
-            <tr>
-                <td class="item-details-label">Audio Only</td>
-                <td>{{ form.audio_only }}</td>
-            </tr>
-            <tr>
-                <td class="item-details-label">URL</td>
-                <td class="item-details-url">
-                    <a target="_blank" href="{{ form.url }}" >{{ form.url }}</a>
-                </td>
-            </tr>
+            {% for prop_name, prop_val in form.get_properties_for_display() %}
+                <tr>
+                    {% if prop_name != "Status" %}
+                        <td class="item-details-label">{{ prop_name }}</td>
+                        {% if prop_name == "URL" %}
+                            <td class="item-details-url"><a target="_blank" href="{{ form.url }}" >{{ form.url }}</a></td>
+                        {% else %}
+                            <td>{{ prop_val }}</td>
+                        {% endif %}
+                    {% endif %}
+                </tr>
+            {% endfor %}
         </table>
         <div class="w3-section">
             {{ form.submit(class="input-button w3-btn w3-grey w3-round w3-margin") }}
