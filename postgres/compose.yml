@@ -1,7 +1,7 @@
 
 services:
     db:
-        image: postgres:16.4
+        image: postgres:16
         container_name: videodl-db
         restart: unless-stopped
         env_file:
@@ -13,3 +13,4 @@ services:
 
 volumes:
     videodl-db-data:
+
