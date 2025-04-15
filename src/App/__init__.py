@@ -26,14 +26,7 @@ def create_app():
     app.debug = bool(int(app.config[constants.KEY_CONFIG_DEBUG_MODE]))
     app.name = app.config[constants.KEY_CONFIG_APP_NAME]
 
-    db_address = app.config[constants.KEY_CONFIG_DB_ADDRESS]
-    db_catalog = app.config[constants.KEY_CONFIG_DB_CATALOG]
-    db_password = app.config[constants.KEY_CONFIG_DB_PASSWORD]
-    db_user = app.config[constants.KEY_CONFIG_DB_USER]
-
-    app.config["SQLALCHEMY_DATABASE_URI"] = (
-        f"postgresql://{db_user}:{db_password}@{db_address}/{db_catalog}"
-    )
+    app.config["SQLALCHEMY_DATABASE_URI"] = app.config["DATABASE_URL"]
 
     for key, val in app.config.items():
         if key.isupper():

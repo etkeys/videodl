@@ -1,0 +1,36 @@
+
+services:
+  web:
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: web.dockerfile
+    image: videodl:latest
+    container_name: videodl
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./_artifacts:/artifacts
+      - ./_logs:/logs
+    environment:
+      DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:5432/videodl
+      WEB_SECRET_KEY: ${WEB_SECRET_KEY}
+      WEB_ENVIRONMENT: development
+
+  db:
+    image: postgres:16
+    container_name: videodl-db
+    restart: unless-stopped
+    ports:
+        - 127.0.0.1:${DATABASE_HOST_PORT}:5432
+    volumes:
+        - videodl-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: videodl
+
+volumes:
+    videodl-db-data:
