@@ -55,79 +55,100 @@ cd src
 python3 worker_run.py
 ```
 
-## Deploying
+## Installing
 
-> **NOTE:** The Github Actions workflow will package the application files, 
-support files, and configuration files into a single tar file. The tar file will
-then be copied to an ftp server.
+The Github Actions workflow will create the docker images for the videodl (web)
+and videodl-worker (worker) services. You can download them from the release
+page.
 
-1. Copy the tar file from the ftp server to the deploy server.
+### Initial install
 
-1. Stop the services that run the application. This is needed so the application
-files can be safely replaced.
+1. Copy the *videodl.image.tar* and *videodl-worker.image.tar* from the release
+page to the machine you wish to run the app.
 
-    ```sh
-    sudo systemctl stop videodl_worker.service
-    sudo systemctl stop videodl.service
-    ```
-
-1. `cd` into the directory that contains all the application files.
-
-1. Delete all the files in the directory
+1. Import the images into docker.
 
     ```sh
-    rm -rf *
+    docker load < videodl.image.tar
+    docker load < videodl-worker.image.tar
     ```
 
-1. Copy the tar file that was copied from the FTP server to the current directory.
+1. Create `compose.yml` and `.env` file (see samples).
 
-1. Unpack the tar file
+1. Create containers
 
     ```sh
-    tar xvfz <tar_file>
+    docker compose create
     ```
 
-1. If the `systemd` service files have been updated:
+1. Start the database service.
 
-    1. Copy the service files to `/usr/local/lib/systemd/system/`.
+    ```sh
+    docker compose start db
+    ```
 
-    1. Reload the `systemd` daemon to pickup the new changes.
+1. Run command apply database structure
+
+    ```sh
+    docker compose run --rm web flask db upgrade
+    ```
+
+    > **NOTE:** Using `--rm` will create and destroy a temporary container
+    > which runs the command.
+
+1. Start all services
+
+    ```sh
+    docker compose up -d
+    ```
+
+### Upgrading to a newer version
+
+1. Copy the *videodl.image.tar* and *videodl-worker.image.tar* from the release
+page to the machine you wish to run the app.
+
+1. Import the images into docker.
+
+    ```sh
+    docker load < videodl.image.tar
+    docker load < videodl-worker.image.tar
+    ```
+
+1. Stop all containers
+
+    ```sh
+    docker compose stop
+    ```
+
+1. Update `compose.yml` and `.env` files as needed.
+
+1. Recreate containers
+
+    ```sh
+    docker compose create --force-recreate
+    ```
+
+    > **NOTE:** Using `--force-recreate` will not affect data stored in volumes
+
+1. If database migrations need to be applied (see Release Notes)
+
+    1. Start the database service.
 
         ```sh
-        sudo systemctl daemon-reload
+        docker compose start db
         ```
 
-1. Create a new python virtual environment.
-
-    ```sh
-    python3 -m venv venv
-    ```
-
-1. Activate the python virtual environment.
-
-    ```sh
-    source venv/bin/activate
-    ```
-
-1. Install package dependencies
-
-    ```sh
-    pip install -r requirements.txt
-    ```
-
-1. If the application database needs to be upgraded.
-
-    1. `cd` into the `src/` directory.
-
-    1. Upgrade the database.
+    1. Run command apply database structure
 
         ```sh
-        flask db upgrade
+        docker compose run --rm web flask db upgrade
         ```
 
-1. Start the applications that run the application.
+        > **NOTE:** Using `--rm` will create and destroy a temporary container
+        > which runs the command.
+
+1. Start all services
 
     ```sh
-    sudo systemctl start videodl_worker.service
-    sudo systemctl start videodl.service
+    docker compose up -d
     ```
