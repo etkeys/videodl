@@ -17,7 +17,23 @@ services:
     environment:
       DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:5432/videodl
       WEB_SECRET_KEY: ${WEB_SECRET_KEY}
-      WEB_ENVIRONMENT: development
+      VIDEODL_ENVIRONMENT: ${VIDEODL_ENVIRONMENT}
+
+  worker:
+    depends_on:
+      - db
+      - web
+    build:
+      context: .
+      dockerfile: worker.dockerfile
+    image: videodl-worker:latest
+    container_name: videodl-worker
+    volumes:
+      - ./_artifacts:/artifacts
+      - ./_logs:/logs
+    environment:
+      DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:5432/videodl
+      VIDEODL_ENVIRONMENT: ${VIDEODL_ENVIRONMENT}
 
   db:
     image: postgres:16

@@ -181,11 +181,6 @@ if __name__ == "__main__":
     else:
         g_simulate = args.simulate
 
-    if app.config[constants.KEY_CONFIG_DOWNLOADER_APP_DIR]:
-        g_downloader_app = path.join(
-            app.config[constants.KEY_CONFIG_DOWNLOADER_APP_DIR], g_downloader_app
-        )
-
     if not path.isdir(g_dir_artifacts):
         log(
             f"Directory '{g_dir_artifacts}' does not exist. Exiting.",
