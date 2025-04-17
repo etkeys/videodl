@@ -8,6 +8,7 @@ services:
       dockerfile: web.dockerfile
     image: videodl:latest
     container_name: videodl
+    user: "${HOST_UID:-0}:${HOST_GID:-0}"
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -28,6 +29,7 @@ services:
       dockerfile: worker.dockerfile
     image: videodl-worker:latest
     container_name: videodl-worker
+    user: "${HOST_UID:-0}:${HOST_GID:-0}"
     volumes:
       - ./_artifacts:/artifacts
       - ./_logs:/logs
