@@ -194,14 +194,9 @@ if __name__ == "__main__":
         )
         exit(4)
 
-    idle_wait_seconds = int(app.config[constants.KEY_CONFIG_WORKER_IDLE_WAIT_SECONDS])
-    rate_limit_timeout_min = int(
-        app.config[constants.KEY_CONFIG_WORKER_RATE_LIMIT_TIMEOUT_MIN_SECONDS]
-    )
-    rate_limit_timeout_max = int(
-        app.config[constants.KEY_CONFIG_WORKER_RATE_LIMIT_TIMEOUT_MAX_SECONDS]
-    )
-    rate_limit_timeouts = range(rate_limit_timeout_min, rate_limit_timeout_max + 1)
+    idle_wait_seconds_min = int(app.config[constants.KEY_CONFIG_WORKER_MIN_IDLE_TIMEOUT_SECONDS])
+    idle_wait_seconds_max = int(app.config[constants.KEY_CONFIG_WORKER_MAX_IDLE_TIMEOUT_SECONDS])
+    idle_wait_seconds = range(idle_wait_seconds_min, idle_wait_seconds_max + 1)
 
     log("Entering main loop.", LogLevel.INFOLOW)
     while True:
@@ -217,7 +212,7 @@ if __name__ == "__main__":
                 if ds is None:
                     log('No download sets currently in "Queued".', LogLevel.INFOLOW)
                     log("Nothing to do.")
-                    timeout = idle_wait_seconds
+                    timeout = choice(idle_wait_seconds)
                 else:
                     log(f"Picking download set '{ds.id}' from queue.", LogLevel.INFOLOW)
                     repo.update_download_set_status(ds, DownloadSetStatus.PROCESSING)
@@ -233,14 +228,14 @@ if __name__ == "__main__":
                         LogLevel.INFOLOW,
                     )
                     pack_up_download_items(ds)
-                    timeout = idle_wait_seconds
+                    timeout = choice(idle_wait_seconds)
                 else:
                     do_download(
                         di,
                         args.random_fail_downloading,
                         args.random_fail_finalizing,
                     )
-                    timeout = choice(rate_limit_timeouts)
+                    timeout = choice(idle_wait_seconds)
 
         log(
             f"Sleeping for {timeout} seconds. Wake up at: {datetime_now() + timedelta(seconds=timeout)}."
