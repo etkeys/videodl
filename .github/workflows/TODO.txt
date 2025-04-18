@@ -1,7 +1,0 @@
-
-Need new workflow that will save docker images an publish them to a release page.
-
-This is probably the command to use to export the images.
-
-docker save videodl:latest > videodl.image.tar
-docker save videodl-worker:latest > videodl-worker.image.tar
