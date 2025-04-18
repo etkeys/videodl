@@ -113,8 +113,8 @@ page to the machine you wish to run the app.
 1. Import the images into docker.
 
     ```sh
-    docker load < videodl.image.tar
-    docker load < videodl-worker.image.tar
+    docker load < videodl.image.tar.gz
+    docker load < videodl-worker.image.tar.gz
     ```
 
 1. Stop all containers
