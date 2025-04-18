@@ -102,6 +102,9 @@ page to the machine you wish to run the app.
     docker compose up -d
     ```
 
+1. To gain initial access to the app, you'll need to use the recovery account
+(see [Recovering access to the app](#recovering-access-to-the-app)).
+
 ### Upgrading to a newer version
 
 1. Copy the *videodl.image.tar* and *videodl-worker.image.tar* from the release
@@ -152,3 +155,17 @@ page to the machine you wish to run the app.
     ```sh
     docker compose up -d
     ```
+
+## Recovering access to the app
+
+If you loose your access token or are running the app for the first time, you
+can use the *Recovery* account to create you're own account or generate a new
+access token.
+
+1. Generate a new access token for the *Recovery* account.
+
+    ```sh
+    docker compose exec web python /app/recovery.py
+    ```
+
+1. Copy the value generate, and use that to log into the app.
