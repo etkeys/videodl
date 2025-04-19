@@ -7,7 +7,6 @@ services:
       context: .
       dockerfile: web.dockerfile
     image: videodl-web:latest
-    container_name: videodl-web
     user: "${HOST_UID:-0}:${HOST_GID:-0}"
     restart: unless-stopped
     ports:
@@ -28,7 +27,6 @@ services:
       context: .
       dockerfile: worker.dockerfile
     image: videodl-worker:latest
-    container_name: videodl-worker
     user: "${HOST_UID:-0}:${HOST_GID:-0}"
     volumes:
       - ${HOST_DIR_ARTIFACTS}:/artifacts
@@ -41,7 +39,6 @@ services:
 
   db:
     image: postgres:16
-    container_name: videodl-db
     restart: unless-stopped
     ports:
         - 127.0.0.1:${DATABASE_HOST_PORT}:5432
