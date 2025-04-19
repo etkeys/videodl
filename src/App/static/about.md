@@ -1,5 +1,8 @@
 ## Video DL
 
+Version: {{ version_string }}
+Last updated: {{ build_date_string }}
+
 [TOC]
 
 ### About Video DL
@@ -87,9 +90,3 @@ Stealing is bad, okay?
 App not behaving in a way you expected?
 Should the app do something new?
 Please contact me.
-
-### Version
-
-Last updated: {{ last_updated_string }}
-
-Version: {{ version_string }}

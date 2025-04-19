@@ -19,6 +19,11 @@ from App.models import (
 from App.models.repo import worker_repo as repo
 from App.utils import create_safe_file_name, datetime_now
 
+g_version_message = """
+Video DL Background Worker
+Version: {{ version_string }}
+Build Date: {{ build_date_string }}
+"""
 g_dir_artifacts = None
 g_dir_logs = None
 g_simulate = False
@@ -166,6 +171,8 @@ def pack_up_download_items(ds: DownloadSet):
 
 
 if __name__ == "__main__":
+    print(g_version_message)
+
     args = get_arg_parser().parse_args()
 
     app = create_app()
