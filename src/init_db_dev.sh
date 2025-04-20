@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 
-docker stop videodl-db
+docker compose rm --stop --force
+echo "Removing volume..." && docker volume rm videodl-development_videodl-db-data
 
-docker rm videodl-db && docker volume rm postgres_videodl-db-data
-
-docker compose -f ../postgres/compose.yml up --detach && \
+docker compose up --detach && \
+echo "Waiting for DB to start..." && \
 sleep 2s && \
+echo "Applying migrations..." && \
 flask db upgrade && \
 python3 seed_db_dev.py
 
