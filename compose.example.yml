@@ -1,0 +1,53 @@
+
+services:
+  web:
+    depends_on:
+      - db
+    build:
+      context: .
+      dockerfile: web.dockerfile
+    image: videodl-web:latest
+    user: "${HOST_UID:-0}:${HOST_GID:-0}"
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    volumes:
+      - ${HOST_DIR_ARTIFACTS}:/artifacts
+      - ${HOST_DIR_LOGS}:/logs
+    environment:
+      DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:5432/videodl
+      WEB_SECRET_KEY: ${WEB_SECRET_KEY}
+      VIDEODL_ENVIRONMENT: ${VIDEODL_ENVIRONMENT}
+
+  worker:
+    depends_on:
+      - db
+      - web
+    build:
+      context: .
+      dockerfile: worker.dockerfile
+    image: videodl-worker:latest
+    user: "${HOST_UID:-0}:${HOST_GID:-0}"
+    volumes:
+      - ${HOST_DIR_ARTIFACTS}:/artifacts
+      - ${HOST_DIR_LOGS}:/logs
+    environment:
+      DATABASE_URL: postgresql://${DATABASE_USER}:${DATABASE_PASSWORD}@db:5432/videodl
+      VIDEODL_ENVIRONMENT: ${VIDEODL_ENVIRONMENT}
+      WORKER_MIN_IDLE_TIMEOUT_SECONDS: ${WORKER_MIN_IDLE_TIMEOUT_SECONDS}
+      WORKER_MAX_IDLE_TIMEOUT_SECONDS: ${WORKER_MAX_IDLE_TIMEOUT_SECONDS}
+
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    ports:
+        - 127.0.0.1:${DATABASE_HOST_PORT}:5432
+    volumes:
+        - videodl-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: videodl
+
+volumes:
+    videodl-db-data:

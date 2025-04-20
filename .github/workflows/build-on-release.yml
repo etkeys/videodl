@@ -1,0 +1,50 @@
+name: Build and Upload Docker Images on Release
+
+on:
+  release:
+    types: [released]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-upload:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set app version and build date
+      run: |
+        BUILD_DATE=$(TZ="America/New_York" date +'%F %r')
+        BUILD_NUMBER=$(printf "%04d" ${{ github.run_number }})
+        COMMIT_HASH=$(echo ${{ github.sha }} | cut -c 1-10)
+        TAG_NAME=$(echo ${{ github.ref }} | cut -d '/' -f 3)
+        APP_VERSION="${TAG_NAME}-${BUILD_NUMBER}+${COMMIT_HASH}"
+        sed -i "s/{{ build_date_string }}/${BUILD_DATE}/" src/App/static/about.md
+        sed -i "s/{{ version_string }}/${APP_VERSION}/" src/App/static/about.md
+        sed -i "s/{{ build_date_string }}/${BUILD_DATE}/" src/worker_run.py
+        sed -i "s/{{ version_string }}/${APP_VERSION}/" src/worker_run.py
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+    
+    - name: Build web Docker image
+      run: docker build -t videodl-web -f web.dockerfile .
+    
+    - name: Build worker Docker image
+      run: docker build -t videodl-worker -f worker.dockerfile .
+    
+    - name: Save web Docker image
+      run: docker save videodl-web | gzip > videodl-web.tar.gz
+    
+    - name: Save worker Docker image
+      run: docker save videodl-worker | gzip > videodl-worker.tar.gz
+    
+    - name: Upload release assets
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          videodl-web.tar.gz
+          videodl-worker.tar.gz

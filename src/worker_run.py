@@ -19,6 +19,11 @@ from App.models import (
 from App.models.repo import worker_repo as repo
 from App.utils import create_safe_file_name, datetime_now
 
+g_version_message = """
+Video DL Background Worker
+Version: {{ version_string }}
+Build Date: {{ build_date_string }}
+"""
 g_dir_artifacts = None
 g_dir_logs = None
 g_simulate = False
@@ -166,6 +171,8 @@ def pack_up_download_items(ds: DownloadSet):
 
 
 if __name__ == "__main__":
+    print(g_version_message)
+
     args = get_arg_parser().parse_args()
 
     app = create_app()
@@ -181,11 +188,6 @@ if __name__ == "__main__":
     else:
         g_simulate = args.simulate
 
-    if app.config[constants.KEY_CONFIG_DOWNLOADER_APP_DIR]:
-        g_downloader_app = path.join(
-            app.config[constants.KEY_CONFIG_DOWNLOADER_APP_DIR], g_downloader_app
-        )
-
     if not path.isdir(g_dir_artifacts):
         log(
             f"Directory '{g_dir_artifacts}' does not exist. Exiting.",
@@ -199,14 +201,9 @@ if __name__ == "__main__":
         )
         exit(4)
 
-    idle_wait_seconds = int(app.config[constants.KEY_CONFIG_WORKER_IDLE_WAIT_SECONDS])
-    rate_limit_timeout_min = int(
-        app.config[constants.KEY_CONFIG_WORKER_RATE_LIMIT_TIMEOUT_MIN_SECONDS]
-    )
-    rate_limit_timeout_max = int(
-        app.config[constants.KEY_CONFIG_WORKER_RATE_LIMIT_TIMEOUT_MAX_SECONDS]
-    )
-    rate_limit_timeouts = range(rate_limit_timeout_min, rate_limit_timeout_max + 1)
+    idle_wait_seconds_min = int(app.config[constants.KEY_CONFIG_WORKER_MIN_IDLE_TIMEOUT_SECONDS])
+    idle_wait_seconds_max = int(app.config[constants.KEY_CONFIG_WORKER_MAX_IDLE_TIMEOUT_SECONDS])
+    idle_wait_seconds = range(idle_wait_seconds_min, idle_wait_seconds_max + 1)
 
     log("Entering main loop.", LogLevel.INFOLOW)
     while True:
@@ -222,7 +219,7 @@ if __name__ == "__main__":
                 if ds is None:
                     log('No download sets currently in "Queued".', LogLevel.INFOLOW)
                     log("Nothing to do.")
-                    timeout = idle_wait_seconds
+                    timeout = choice(idle_wait_seconds)
                 else:
                     log(f"Picking download set '{ds.id}' from queue.", LogLevel.INFOLOW)
                     repo.update_download_set_status(ds, DownloadSetStatus.PROCESSING)
@@ -238,14 +235,14 @@ if __name__ == "__main__":
                         LogLevel.INFOLOW,
                     )
                     pack_up_download_items(ds)
-                    timeout = idle_wait_seconds
+                    timeout = choice(idle_wait_seconds)
                 else:
                     do_download(
                         di,
                         args.random_fail_downloading,
                         args.random_fail_finalizing,
                     )
-                    timeout = choice(rate_limit_timeouts)
+                    timeout = choice(idle_wait_seconds)
 
         log(
             f"Sleeping for {timeout} seconds. Wake up at: {datetime_now() + timedelta(seconds=timeout)}."

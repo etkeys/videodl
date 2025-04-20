@@ -1,0 +1,19 @@
+# This file is just to support local development.
+# For a better example to use for production setup, see compose.example.yml
+
+services:
+  db:
+    image: postgres:16
+    env_file:
+      - .env
+    ports:
+        - 127.0.0.1:${DATABASE_HOST_PORT}:5432
+    volumes:
+        - videodl-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: ${DATABASE_USER}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: videodl
+
+volumes:
+    videodl-db-data:

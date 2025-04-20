@@ -5,22 +5,19 @@ load_dotenv()
 
 
 class Config:
-    APP_DB_ADDRESS = environ.get("VIDEODL_DB_ADDRESS")
-    APP_DB_CATALOG = environ.get("VIDEODL_DB_CATALOG")
-    APP_DB_PASSWORD = environ.get("VIDEODL_DB_PASSWORD")
-    APP_DB_USER = environ.get("VIDEODL_DB_USER")
-    APP_DEBUG_MODE = environ.get("FLASK_DEBUG")
-    APP_DIR_ARTIFACTS = environ.get("VIDEODL_DIR_ARTIFACTS")
-    APP_DIR_LOGS = environ.get("VIDEODL_DIR_LOGS")
-    APP_DOWNLOADER_APP_DIR = environ.get("VIDEODL_DOWNLOADER_APP_DIR")
+    DATABASE_URL = environ.get("DATABASE_URL")
+    APP_DEBUG_MODE = environ.get("FLASK_DEBUG", 0)
+    APP_DIR_ARTIFACTS = environ.get("VIDEODL_DIR_ARTIFACTS", "/artifacts")
+    APP_DIR_LOGS = environ.get("VIDEODL_DIR_LOGS", "/logs")
     APP_ENVIRONMENT = environ.get("VIDEODL_ENVIRONMENT")
-    APP_NAME = environ.get("VIDEODL_APP_NAME")
-    SECRET_KEY = environ.get("SECRET_KEY")
-    SESSION_PROTECTION = environ.get("SESSION_PROTECTION")
-    WORKER_IDLE_WAIT_SECONDS = environ.get("VIDEODL_WORKER_IDLE_WAIT_SECONDS")
-    WORKER_RATE_LIMIT_TIMEOUT_MIN_SECONDS = environ.get(
-        "VIDEODL_WORKER_RATE_LIMIT_TIMEOUT_MIN_SECONDS"
+    APP_NAME = environ.get("VIDEODL_APP_NAME", "Video DL")
+    SECRET_KEY = environ.get("WEB_SECRET_KEY")
+    SESSION_PROTECTION = "strong"
+    WORKER_MIN_IDLE_TIMEOUT_SECONDS = environ.get(
+        "WORKER_MIN_IDLE_TIMEOUT_SECONDS",
+        240
     )
-    WORKER_RATE_LIMIT_TIMEOUT_MAX_SECONDS = environ.get(
-        "VIDEODL_WORKER_RATE_LIMIT_TIMEOUT_MAX_SECONDS"
+    WORKER_MAX_IDLE_TIMEOUT_SECONDS = environ.get(
+        "WORKER_MAX_IDLE_TIMEOUT_SECONDS",
+        300
     )
