@@ -37,14 +37,14 @@ jobs:
       run: docker build -t videodl-worker -f worker.dockerfile .
     
     - name: Save web Docker image
-      run: docker save videodl-web | gzip > videodl-web.tar.gz
+      run: docker save videodl-web | gzip > videodl-web.docker_image.tar.gz
     
     - name: Save worker Docker image
-      run: docker save videodl-worker | gzip > videodl-worker.tar.gz
+      run: docker save videodl-worker | gzip > videodl-worker.docker_image.tar.gz
     
     - name: Upload release assets
       uses: softprops/action-gh-release@v2
       with:
         files: |
-          videodl-web.tar.gz
-          videodl-worker.tar.gz
+          videodl-web.docker_image.tar.gz
+          videodl-worker.docker_image.tar.gz
