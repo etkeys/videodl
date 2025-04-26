@@ -21,3 +21,7 @@ class Config:
         "WORKER_MAX_IDLE_TIMEOUT_SECONDS",
         300
     )
+    WORKER_PRUNE_AFTER_DAYS = environ.get(
+        "WORKER_PRUNE_AFTER_DAYS",
+        7
+    )

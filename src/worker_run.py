@@ -1,9 +1,9 @@
 from argparse import ArgumentParser
-from datetime import timedelta
-from os import makedirs, path
+from datetime import datetime, timedelta
+from os import makedirs, path, remove, walk
 from random import choice
 import subprocess
-from shutil import make_archive, move
+from shutil import make_archive, move, rmtree
 from tempfile import TemporaryDirectory
 from time import sleep
 from traceback import format_exc
@@ -28,7 +28,6 @@ g_dir_artifacts = None
 g_dir_logs = None
 g_simulate = False
 g_downloader_app = "yt-dlp"
-
 
 def get_arg_parser():
     parser = ArgumentParser(
@@ -154,6 +153,82 @@ def do_download(
         log(format_exc(), LogLevel.DEBUG, log_id=item.id)
         repo.update_download_item_status(item, DownloadItemStatus.FAILED)
 
+def do_prune(prune_time: datetime):
+    log(f"Pruning data older than {prune_time}.", LogLevel.INFO)
+    prune_logs(prune_time)
+    prune_artifacts(prune_time)
+    repo.prune_download_sets(prune_time)
+
+def ignore_file(file: str) -> bool:
+    if file.startswith("."):
+        return True
+    return False
+
+def prune_artifacts(prune_time: datetime):
+    log("Pruning artifacts.", LogLevel.INFO)
+    prune_time_ts = prune_time.timestamp()
+    for root, dirs, files in walk(g_dir_artifacts, topdown=False):
+        for file in files:
+            if ignore_file(file):
+                log(f"Ignoring file '{file}'.", LogLevel.INFOLOW)
+                continue
+            file_path = path.join(root, file)
+            try:
+                if path.isfile(file_path):
+                    file_time_ts = path.getmtime(file_path)
+                    if file_time_ts < prune_time_ts:
+                        log(f"Deleting artifact file '{file}'.", LogLevel.INFOLOW)
+                        remove(file_path)
+            except Exception as ex:
+                log(f"Error deleting file '{file}': {ex}", LogLevel.ERROR)
+                log(format_exc(), LogLevel.DEBUG)
+                continue
+
+        for dir in dirs:
+            dir_path = path.join(root, dir)
+            try:
+                if path.isdir(dir_path):
+                    dir_time_ts = path.getmtime(dir_path)
+                    if dir_time_ts < prune_time_ts:
+                        log(f"Deleting artifact directory '{dir}'.", LogLevel.INFOLOW)
+                        rmtree(dir_path)
+            except Exception as ex:
+                log(f"Error deleting directory '{dir}': {ex}", LogLevel.ERROR)
+                log(format_exc(), LogLevel.DEBUG)
+                continue
+
+def prune_logs(prune_time: datetime):
+    log("Pruning logs.", LogLevel.INFO)
+    prune_time_ts = prune_time.timestamp()
+    for root, _, files in walk(g_dir_logs, topdown=False):
+        for file in files:
+            if ignore_file(file):
+                log(f"Ignoring file '{file}'.", LogLevel.INFOLOW)
+                continue
+            file_path = path.join(g_dir_logs, file)
+            try:
+                if path.isfile(file_path):
+                    file_time_ts = path.getmtime(file_path)
+                    if file_time_ts < prune_time_ts:
+                        log(f"Deleting log file '{file}'.", LogLevel.INFOLOW)
+                        remove(file_path)
+            except Exception as ex:
+                log(f"Error deleting log file '{file}': {ex}", LogLevel.ERROR)
+                log(format_exc(), LogLevel.DEBUG)
+                continue
+
+def get_download_set() -> DownloadSet:
+    ds = repo.get_processing_download_set()
+    if ds is None:
+        ds = repo.get_oldest_queued_download_set()
+
+    if ds is None:
+        log("No download sets currently in 'Processing' or 'Queued'.", LogLevel.INFOLOW)
+        return None
+
+    log(f"Picked download set '{ds.id}' for processing.", LogLevel.INFOLOW)
+    repo.update_download_set_status(ds, DownloadSetStatus.PROCESSING)
+    return ds
 
 def pack_up_download_items(ds: DownloadSet):
     log(f"Packing up download set '{ds.id}'.", LogLevel.INFOLOW)
@@ -204,28 +279,17 @@ if __name__ == "__main__":
     idle_wait_seconds_min = int(app.config[constants.KEY_CONFIG_WORKER_MIN_IDLE_TIMEOUT_SECONDS])
     idle_wait_seconds_max = int(app.config[constants.KEY_CONFIG_WORKER_MAX_IDLE_TIMEOUT_SECONDS])
     idle_wait_seconds = range(idle_wait_seconds_min, idle_wait_seconds_max + 1)
+    prune_after_days = int(app.config[constants.KEY_CONFIG_WORKER_PRUNE_AFTER_DAYS])
+    next_prune_time = datetime_now()
 
     log("Entering main loop.", LogLevel.INFOLOW)
     while True:
         log("Starting work.")
 
         with app.app_context():
-            ds = repo.get_processing_download_set()
+            ds = get_download_set()
 
-            if ds is None:
-                log('No download sets currently in "Processing".', LogLevel.INFOLOW)
-                ds = repo.get_oldest_queued_download_set()
-
-                if ds is None:
-                    log('No download sets currently in "Queued".', LogLevel.INFOLOW)
-                    log("Nothing to do.")
-                    timeout = choice(idle_wait_seconds)
-                else:
-                    log(f"Picking download set '{ds.id}' from queue.", LogLevel.INFOLOW)
-                    repo.update_download_set_status(ds, DownloadSetStatus.PROCESSING)
-
-            if not ds is None:
-                log(f"Processing download set '{ds.id}'.")
+            if ds:
                 repo.reset_items_in_progress(ds.id)
                 di = repo.get_oldest_queued_download_item(ds.id)
 
@@ -235,15 +299,23 @@ if __name__ == "__main__":
                         LogLevel.INFOLOW,
                     )
                     pack_up_download_items(ds)
-                    timeout = choice(idle_wait_seconds)
                 else:
                     do_download(
                         di,
                         args.random_fail_downloading,
                         args.random_fail_finalizing,
                     )
-                    timeout = choice(idle_wait_seconds)
 
+            if not ds:
+                if datetime_now() > next_prune_time:
+                    do_prune(datetime_now() - timedelta(days=prune_after_days))
+                    next_prune_time = datetime_now() + timedelta(minutes=60)
+                    log(
+                        f"Next prune time set to {next_prune_time}.",
+                        LogLevel.INFO,
+                    )
+
+        timeout = choice(idle_wait_seconds)
         log(
             f"Sleeping for {timeout} seconds. Wake up at: {datetime_now() + timedelta(seconds=timeout)}."
         )

@@ -98,7 +98,7 @@ class DownloadSet(db.Model):
     completed_datetime = mapped_column(TIMESTAMP())
     archive_path = mapped_column(String(255))
 
-    items = relationship("DownloadItem", back_populates="download_set")
+    items = relationship("DownloadItem", back_populates="download_set", cascade="all, delete", passive_deletes=True)
     user = relationship("User", back_populates="downloads")
 
     def belongs_to_user(self, user_id):
@@ -155,9 +155,9 @@ class DownloadItem(db.Model):
         TIMESTAMP(), nullable=False, default=utils.datetime_now
     )
     download_set_id = mapped_column(
-        String(36), ForeignKey("download_sets.id"), nullable=False
+        String(36), ForeignKey("download_sets.id", ondelete="CASCADE"), nullable=False
     )
-    copied_from_id = mapped_column(String(36), ForeignKey("download_items.id"))
+    copied_from_id = mapped_column(String(36), ForeignKey("download_items.id", ondelete='SET NULL'))
 
     copied_from = relationship("DownloadItem", back_populates="copied_to")
     copied_to = relationship(

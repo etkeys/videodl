@@ -1,3 +1,4 @@
+from datetime import datetime
 from sqlalchemy.sql import or_
 from sqlalchemy.orm import aliased, joinedload
 
@@ -376,6 +377,16 @@ class WorkerRepository:
             .first()
         )
 
+    def prune_download_sets(self, prune_time: datetime):
+        try:
+            DownloadSet.query.where(
+                DownloadSet.completed_datetime < prune_time,
+            ).delete()
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
     def reset_items_in_progress(self, download_set_id: str):
         DownloadItem.query.where(
             DownloadItem.download_set_id == download_set_id,
@@ -395,15 +406,18 @@ class WorkerRepository:
     def update_download_set_status(
         self, ds: DownloadSet, new_status: DownloadSetStatus, archive_path: str = None
     ):
-        ds.status = new_status
-        if ds.is_completed():
-            ds.completed_datetime = datetime_now()
-            if archive_path is None:
-                raise ValueError("Archive path expected, but got None.")
-            ds.archive_path = archive_path
+        try:
+            ds.status = new_status
+            if ds.is_terminated():
+                ds.completed_datetime = datetime_now()
+                if ds.is_completed() and archive_path is None:
+                    raise ValueError("Archive path expected, but got None.")
+                ds.archive_path = archive_path
 
-        db.session.commit()
-
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            raise e
 
 repo = Repository()
 
