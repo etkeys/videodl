@@ -12,9 +12,22 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - name: Install Tailscale
+      uses: tailscale/github-action@v4
+      with:
+        oauth-client-id: ${{ secrets.TAILSCALE_OAUTH_CLIENT_ID }}
+        oauth-secret: ${{ secrets.TAILSCALE_OAUTH_SECRET }}
+        tags: tag:ci
+
+    - name: Trust private registry self-signed cert
+      run: |
+        echo "${{ secrets.REGISTRY_CERT }}" | sudo tee /usr/local/share/ca-certificates/cr.etkeys.xyz.crt
+        sudo update-ca-certificates
+        sudo systemctl restart docker
+
     - name: Checkout code
       uses: actions/checkout@v3
-
+    
     - name: Set app version and build date
       run: |
         BUILD_DATE=$(TZ="America/New_York" date +'%F %r')
@@ -48,3 +61,18 @@ jobs:
         files: |
           videodl-web.docker_image.tar.gz
           videodl-worker.docker_image.tar.gz
+
+    - name: Login to private registry
+      run: |
+        docker login \
+          -u ${{ secrets.REGISTRY_USER }} \
+          -p ${{ secrets.REGISTRY_PASSWORD }} \
+          cr.etkeys.xyz:31500
+
+    - name: Push web Docker image
+      run: |
+        docker push cr.etkeys.xyz:31500/videodl-web:latest
+
+    - name: Push worker Docker image
+      run: |
+        docker push cr.etkeys.xyz:31500/videodl-web:latest
