@@ -44,10 +44,10 @@ jobs:
       uses: docker/setup-buildx-action@v2
     
     - name: Build web Docker image
-      run: docker build -t videodl-web -f web.dockerfile .
+      run: docker build -t cr.etkeys.xyz:31500/videodl-web -f web.dockerfile .
     
     - name: Build worker Docker image
-      run: docker build -t videodl-worker -f worker.dockerfile .
+      run: docker build -t cr.etkeys.xyz:31500/videodl-worker -f worker.dockerfile .
     
     - name: Save web Docker image
       run: docker save videodl-web | gzip > videodl-web.docker_image.tar.gz
