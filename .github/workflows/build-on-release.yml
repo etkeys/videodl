@@ -50,10 +50,10 @@ jobs:
       run: docker build -t cr.etkeys.xyz:31500/videodl-worker -f worker.dockerfile .
     
     - name: Save web Docker image
-      run: docker save videodl-web | gzip > videodl-web.docker_image.tar.gz
+      run: docker save cr.etkeys.xyz:31500/videodl-web | gzip > videodl-web.docker_image.tar.gz
     
     - name: Save worker Docker image
-      run: docker save videodl-worker | gzip > videodl-worker.docker_image.tar.gz
+      run: docker save cr.etkeys.xyz:31500/videodl-worker | gzip > videodl-worker.docker_image.tar.gz
     
     - name: Upload release assets
       uses: softprops/action-gh-release@v2
